@@ -3,11 +3,7 @@ import Employee from "../models/Employee.js";
 import SavedAttendance from "../models/SavedAttendance.js";
 
 
-/**
- * MARK ATTENDANCE (IN / OUT)
- * First scan  → IN time
- * Second scan → OUT time
- */
+
 export const markAttendance = async (req, res) => {
   try {
     const { employeeId } = req.body;
@@ -42,7 +38,7 @@ export const markAttendance = async (req, res) => {
       return res.json({
         message: "✅ Attendance IN marked successfully",
         type: "IN",
-        attendance, // 👈 frontend ko full record
+        attendance, 
       });
     }
 
@@ -54,7 +50,7 @@ export const markAttendance = async (req, res) => {
       return res.json({
         message: "✅ Attendance OUT marked successfully",
         type: "OUT",
-        attendance, // 👈 updated record
+        attendance, 
       });
     }
 
@@ -103,7 +99,7 @@ export const getTodayAttendance = async (req, res) => {
   }
 };
 
-// 📊 MONTHLY ATTENDANCE REPORT (ADMIN)
+// MONTHLY ATTENDANCE REPORT (ADMIN)
 export const getAttendanceReport = async (req, res) => {
   try {
     const { month, year } = req.query;

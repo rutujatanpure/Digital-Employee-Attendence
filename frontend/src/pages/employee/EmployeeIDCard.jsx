@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import API from "../../services/api";
 import EmployeeIdOnlyCard from "../../components/employee/EmployeeIdOnlyCard";
+import EmployeeLayout from "../../layouts/EmployeeLayout";
 
 export default function EmployeeIDCard() {
   const { id } = useParams();
@@ -11,11 +12,9 @@ export default function EmployeeIDCard() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Fetch employee + today's attendance
   useEffect(() => {
     setLoading(true);
 
-    // Get employee details
     API.get(`/public/employees/${id}`)
       .then((res) => {
         setEmp(res.data);
@@ -26,13 +25,11 @@ export default function EmployeeIDCard() {
         setLoading(false);
       });
 
-    // Get today's attendance
     API.get(`/attendance/today/${id}`)
       .then((res) => setAttendance(res.data))
       .catch(() => setAttendance(null));
   }, [id]);
 
-  // 🔹 Mark attendance (IN / OUT)
   const handleAttendanceScan = async () => {
     if (!emp) return;
 
@@ -48,63 +45,70 @@ export default function EmployeeIDCard() {
     }
   };
 
-  if (loading) {
-    return <p className="text-center mt-4">Loading...</p>;
-  }
-
-  if (!emp) {
-    return <p className="text-center mt-4 text-danger">{message}</p>;
-  }
+  if (loading) return <p className="text-center mt-4">Loading...</p>;
+  if (!emp) return <p className="text-center mt-4 text-danger">{message}</p>;
 
   return (
-    <div className="container mt-4">
-      <div className="row justify-content-center gap-4">
+    <EmployeeLayout>
+      {/* FLUID container to avoid side shift */}
+      <div className="container-fluid px-3 py-3">
+        <div className="row justify-content-center g-4">
 
-        {/* LEFT SIDE – EMPLOYEE ID CARD */}
-        <div className="col-md-4">
-          <EmployeeIdOnlyCard emp={emp} />
-        </div>
-
-        {/* RIGHT SIDE – ATTENDANCE CARD */}
-        <div className="col-md-4">
-          <div className="card p-3 shadow text-center">
-            <h5 className="mb-3">Scan your ID for Attendance</h5>
-
-            <button
-              className="btn btn-primary w-100"
-              onClick={handleAttendanceScan}
+          {/* ID CARD */}
+          <div className="col-12 d-flex justify-content-center">
+            <div
+              className="d-flex justify-content-center w-100"
+              style={{ maxWidth: "360px" }}
             >
-              Scan / Mark Attendance
-            </button>
-
-            {attendance && (
-              <p className="mt-3">
-                <strong>IN:</strong>{" "}
-                {attendance.inTime
-                  ? new Date(attendance.inTime).toLocaleTimeString()
-                  : "-"}
-                <br />
-                <strong>OUT:</strong>{" "}
-                {attendance.outTime
-                  ? new Date(attendance.outTime).toLocaleTimeString()
-                  : "-"}
-              </p>
-            )}
-
-            {message && (
-              <p
-                className="mt-2"
-                style={{
-                  color: message.includes("❌") ? "red" : "green",
-                }}
-              >
-                {message}
-              </p>
-            )}
+              <EmployeeIdOnlyCard emp={emp} />
+            </div>
           </div>
-        </div>
 
+          {/* ATTENDANCE */}
+          <div className="col-12 d-flex justify-content-center">
+            <div
+              className="card shadow p-4 text-center w-100"
+              style={{ maxWidth: "360px" }}
+            >
+              <h5 className="mb-3">Scan your ID for Attendance</h5>
+
+              <button
+                className="btn btn-primary w-100 mb-3"
+                onClick={handleAttendanceScan}
+              >
+                Scan / Mark Attendance
+              </button>
+
+              {attendance && (
+                <div className="border rounded p-3">
+                  <p className="mb-1">
+                    <strong>IN:</strong>{" "}
+                    {attendance.inTime
+                      ? new Date(attendance.inTime).toLocaleTimeString()
+                      : "-"}
+                  </p>
+                  <p className="mb-0">
+                    <strong>OUT:</strong>{" "}
+                    {attendance.outTime
+                      ? new Date(attendance.outTime).toLocaleTimeString()
+                      : "-"}
+                  </p>
+                </div>
+              )}
+
+              {message && (
+                <p
+                  className="mt-3 fw-semibold"
+                  style={{ color: message.includes("❌") ? "red" : "green" }}
+                >
+                  {message}
+                </p>
+              )}
+            </div>
+          </div>
+
+        </div>
       </div>
-    </div>
+    </EmployeeLayout>
   );
 }

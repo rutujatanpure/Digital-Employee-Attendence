@@ -1,0 +1,54 @@
+
+.table-responsive {
+  overflow-x: auto;              /* Scroll horizontally when needed */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling for mobile */
+}
+
+table {
+  width: 100%;
+  min-width: 1000px;             /* Minimum width to avoid column shrinking */
+  border-collapse: collapse;
+}
+
+th, td {
+  white-space: nowrap;           /* Prevent text wrapping */
+  text-align: center;            /* Center-align content */
+  vertical-align: middle;
+  padding: 10px;                 /* Add spacing for readability */
+  font-size: 0.9rem;
+}
+
+.table-secondary {
+  background-color: #f8f9fa;     /* Light shade for table header */
+}
+
+.btn {
+  font-size: 0.8rem;             /* Adjust button size for responsiveness */
+  padding: 0.5em 1em;            /* Improve button usability */
+}
+
+
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    padding: 0 10px;
+  }
+
+  th, td {
+    font-size: 0.85rem;          /* Reduce font size for small screens */
+  }
+
+  .btn {
+    padding: 0.3em 0.7em;
+  }
+}
+
+@media (max-width: 576px) {
+  th, td {
+    font-size: 0.75rem;          /* Further reduce font for extra small screens */
+  }
+
+  .btn {
+    margin: 0.5em;
+  }
+}

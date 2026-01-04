@@ -1,123 +1,140 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../services/api";
+import loginImage from "../../assets/images/empd.png";
+import PublicNavbar from "../../components/common/PublicNavbar";
 import "./Home.css";
 
 export default function Home() {
-  const [email, setEmail] = useState("");
+  const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
-  const [empId, setEmpId] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
-  // ADMIN LOGIN
-  const adminLogin = async () => {
+  const handleLogin = async () => {
+    if (!userId || !password) {
+      alert("Please enter User ID and Password");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const res = await API.post("/admin/login", { email, password });
-      localStorage.setItem("token", res.data.token);
-      navigate("/admin");
-    } catch {
-      alert("Invalid Admin Credentials");
+      // ADMIN LOGIN
+      if (userId.includes("@")) {
+        const res = await API.post(
+          "/admin/login",
+          { email: userId.trim(), password },
+          { headers: { "Content-Type": "application/json" } }
+        );
+
+        localStorage.setItem("token", res.data.token);
+        navigate("/admin");
+      }
+      // EMPLOYEE LOGIN
+      else {
+        const employeeId = userId.trim().toUpperCase();
+
+        const res = await API.post(
+          "/employees/login",
+          { employeeId, password },
+          { headers: { "Content-Type": "application/json" } }
+        );
+
+        localStorage.setItem("employeeToken", res.data.token);
+        navigate(`/employee/${employeeId}`);
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Invalid credentials");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // EMPLOYEE LOGIN
-  const employeeLogin = () => {
-    if (!empId) return alert("Employee ID is required");
-    navigate(`/employee/${empId}`);
-  };
-
   return (
-    <div className="home-bg">
-      <div className="container">
-        <div className="row justify-content-center align-items-center">
+    <>
+      {/* TOP NAVBAR */}
+      <PublicNavbar />
 
-          {/* EMPLOYEE CARD */}
-          <div className="col-md-5 mb-4">
-            <div className="card login-card shadow">
-              <div className="card-body p-4">
-                <h4 className="text-center fw-bold mb-3">
-                  Employee Login
-                </h4>
+      <div className="home-bg">
+        <div className="container pt-3 pb-2">
 
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">
-                    Employee ID
-                  </label>
-                  <input
-                    className="form-control"
-                    placeholder="Enter your Employee ID"
-                    onChange={(e) => setEmpId(e.target.value)}
-                  />
-                  <small className="text-muted">
-                    * Required: Fill Employee ID to continue
-                  </small>
+          {/* WELCOME TEXT */}
+          <div className="text-center mb-4">
+            <h3 className="fw-bold">Welcome to Attendance System</h3>
+            <p className="text-muted">
+              Secure • Paperless • Fast Employee Login
+            </p>
+          </div>
+
+          <div className="row justify-content-center">
+            <div className="col-lg-10 col-xl-9">
+
+              <div className="card login-wrapper shadow-lg overflow-hidden">
+                <div className="row g-0">
+
+                  {/* LOGIN FORM */}
+                  <div className="col-12 col-md-6">
+                    <div className="p-4 p-md-5 h-100 d-flex flex-column justify-content-center">
+                      <h4 className="fw-bold mb-4 text-center">Login</h4>
+
+                      <div className="mb-3">
+                        <label className="form-label fw-semibold">
+                          User ID
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Enter Your ID"
+                          value={userId}
+                          onChange={(e) => setUserId(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="form-label fw-semibold">
+                          Password
+                        </label>
+                        <input
+                          type="password"
+                          className="form-control"
+                          placeholder="Enter your password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                      </div>
+
+                      <button
+                        className="btn btn-primary w-100 mt-3"
+                        onClick={handleLogin}
+                        disabled={loading}
+                      >
+                        {loading ? "Logging in..." : "Login"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* IMAGE */}
+                  <div className="col-12 col-md-6 d-flex align-items-center justify-content-center bg-light">
+                    <img
+                      src={loginImage}
+                      alt="Login"
+                      className="img-fluid login-image"
+                    />
+                  </div>
+
                 </div>
-
-                <button
-                  className="btn btn-success w-100 mt-3"
-                  onClick={employeeLogin}
-                >
-                  Login as Employee
-                </button>
               </div>
+
             </div>
           </div>
 
-          {/* ADMIN CARD */}
-          <div className="col-md-5 mb-4">
-            <div className="card login-card shadow">
-              <div className="card-body p-4">
-                <h4 className="text-center fw-bold mb-3">
-                  Admin Login
-                </h4>
-
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">
-                    Admin Email
-                  </label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    placeholder="Enter admin email"
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                  <small className="text-muted">
-                    * Required: Valid admin email
-                  </small>
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    placeholder="Enter password"
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <small className="text-muted">
-                    * Required: Admin password
-                  </small>
-                </div>
-
-                <button
-                  className="btn btn-primary w-100 mt-3"
-                  onClick={adminLogin}
-                >
-                  Login as Admin
-                </button>
-              </div>
-            </div>
-          </div>
-
+          <p className="text-center text-muted mt-4 small">
+            © {new Date().getFullYear()} Digital Employee ID System
+          </p>
         </div>
-
-        {/* FOOTER TEXT */}
-        <p className="text-center text-muted mt-4 small">
-          Digital Employee ID System • Secure • Paperless • Fast
-        </p>
       </div>
-    </div>
+    </>
   );
 }

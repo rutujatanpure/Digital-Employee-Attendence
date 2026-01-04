@@ -20,7 +20,7 @@ const generateBarcode = async (employeeId) => {
     textxalign: "center",
   });
 
-  // 🔥 THIS LINE FIXES ENOENT
+  // THIS LINE FIXES ENOENT
   fs.writeFileSync(filePath, png);
 
   return `uploads/employees/${employeeId}.png`;

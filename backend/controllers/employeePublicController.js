@@ -15,7 +15,7 @@ export const getEmployeeCard = async (req, res) => {
       employeeId: emp.employeeId,
       name: emp.name,
       role: emp.role,
-      // ✅ Use exact DB paths (no extra /uploads/)
+      //  Use exact DB paths (no extra /uploads/)
       photo: emp.photo || null,
       barcode: emp.barcode || null,
     });

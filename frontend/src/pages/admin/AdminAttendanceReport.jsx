@@ -37,7 +37,7 @@ export default function AdminAttendanceReport() {
         <Sidebar />
 
         {/* Page Content */}
-        <div className="p-4 w-100 overflow-auto">
+        <div className="p-3 p-md-4 w-100 overflow-auto">
           <div className="card shadow-sm">
             <div className="card-header bg-dark text-white">
               <h5 className="mb-0">Attendance Report</h5>
@@ -47,46 +47,43 @@ export default function AdminAttendanceReport() {
               {/* Filters */}
               <div className="row g-3 mb-3">
                 {/* Month Select */}
-                {/* Month Select */}
-<div className="col-md-3">
-  <select
-    id="month"
-    name="month"
-    className="form-select"
-    value={month}
-    onChange={(e) => setMonth(e.target.value)}
-  >
-    <option value="">Select Month</option>
-    {[...Array(12)].map((_, i) => (
-      <option key={i + 1} value={i + 1}>
-        {i + 1}
-      </option>
-    ))}
-  </select>
-</div>
+                <div className="col-12 col-md-3">
+                  <select
+                    className="form-select"
+                    value={month}
+                    onChange={(e) => setMonth(e.target.value)}
+                  >
+                    <option value="">Select Month</option>
+                    {[...Array(12)].map((_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {i + 1}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-{/* Year Select */}
-<div className="col-md-3">
-  <select
-    id="year"
-    name="year"
-    className="form-select"
-    value={year}
-    onChange={(e) => setYear(e.target.value)}
-  >
-    <option value="">Select Year</option>
-    {years.map((y) => (
-      <option key={y} value={y}>
-        {y}
-      </option>
-    ))}
-  </select>
-</div>
-
+                {/* Year Select */}
+                <div className="col-12 col-md-3">
+                  <select
+                    className="form-select"
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                  >
+                    <option value="">Select Year</option>
+                    {years.map((y) => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 {/* Generate Button */}
-                <div className="col-md-3">
-                  <button className="btn btn-primary w-100" onClick={fetchReport}>
+                <div className="col-12 col-md-3">
+                  <button
+                    className="btn btn-primary w-100"
+                    onClick={fetchReport}
+                  >
                     Generate Report
                   </button>
                 </div>
@@ -94,40 +91,82 @@ export default function AdminAttendanceReport() {
 
               {error && <p className="text-danger">{error}</p>}
 
-              {/* Report Table */}
-              <table className="table table-bordered table-hover">
-                <thead className="table-light">
-                  <tr>
-                    <th>Date</th>
-                    <th>Employee ID</th>
-                    <th>In Time</th>
-                    <th>Out Time</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {attendance.length === 0 && (
+              {/* ================= DESKTOP TABLE ================= */}
+              <div className="d-none d-md-block table-responsive">
+                <table className="table table-bordered table-hover">
+                  <thead className="table-light">
                     <tr>
-                      <td colSpan="4" className="text-center">
-                        No records found
-                      </td>
+                      <th>Date</th>
+                      <th>Employee ID</th>
+                      <th>In Time</th>
+                      <th>Out Time</th>
                     </tr>
-                  )}
+                  </thead>
 
-                  {attendance.map((a, i) => (
-                    <tr key={i}>
-                      <td>{new Date(a.date).toLocaleDateString()}</td>
-                      <td>{a.employeeId}</td>
-                      <td>
-                        {a.inTime ? new Date(a.inTime).toLocaleTimeString() : "-"}
-                      </td>
-                      <td>
-                        {a.outTime ? new Date(a.outTime).toLocaleTimeString() : "-"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  <tbody>
+                    {attendance.length === 0 && (
+                      <tr>
+                        <td colSpan="4" className="text-center">
+                          No records found
+                        </td>
+                      </tr>
+                    )}
+
+                    {attendance.map((a, i) => (
+                      <tr key={i}>
+                        <td>
+                          {new Date(a.date).toLocaleDateString()}
+                        </td>
+                        <td>{a.employeeId}</td>
+                        <td>
+                          {a.inTime
+                            ? new Date(a.inTime).toLocaleTimeString()
+                            : "-"}
+                        </td>
+                        <td>
+                          {a.outTime
+                            ? new Date(a.outTime).toLocaleTimeString()
+                            : "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ================= MOBILE CARD VIEW ================= */}
+              <div className="d-md-none">
+                {attendance.length === 0 && (
+                  <p className="text-center">No records found</p>
+                )}
+
+                {attendance.map((a, i) => (
+                  <div key={i} className="card mb-3 shadow-sm">
+                    <div className="card-body">
+                      <p className="mb-1">
+                        <strong>Date:</strong>{" "}
+                        {new Date(a.date).toLocaleDateString()}
+                      </p>
+                      <p className="mb-1">
+                        <strong>Employee ID:</strong> {a.employeeId}
+                      </p>
+                      <p className="mb-1">
+                        <strong>In Time:</strong>{" "}
+                        {a.inTime
+                          ? new Date(a.inTime).toLocaleTimeString()
+                          : "-"}
+                      </p>
+                      <p className="mb-0">
+                        <strong>Out Time:</strong>{" "}
+                        {a.outTime
+                          ? new Date(a.outTime).toLocaleTimeString()
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* ================= END ================= */}
             </div>
           </div>
         </div>

@@ -1,0 +1,52 @@
+/* Ensure the table container is scrollable */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling for mobile */
+}
+
+/* Prevent text wrapping and skewing of columns */
+table {
+  width: 100%;
+  min-width: 800px; /* Minimum width for columns to fit properly */
+  border-collapse: collapse;
+}
+
+th, td {
+  white-space: nowrap; /* Prevent text wrapping */
+  text-align: center;
+  vertical-align: middle;
+  padding: 10px;
+  font-size: 0.9rem; /* Adjust font size for readability */
+}
+
+.table-light {
+  background-color: #f8f9fa; /* Style for table header */
+}
+
+.badge {
+  font-size: 0.8rem;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  th, td {
+    font-size: 0.85rem; /* Reduce font size */
+    padding: 5px; /* Reduce padding */
+  }
+
+  .badge {
+    font-size: 0.7rem;
+  }
+}
+
+/* Further compression for very small screens */
+@media (max-width: 576px) {
+  th, td {
+    font-size: 0.75rem; /* Further reduce font size */
+    padding: 4px;
+  }
+
+  .badge {
+    font-size: 0.65rem;
+  }
+}

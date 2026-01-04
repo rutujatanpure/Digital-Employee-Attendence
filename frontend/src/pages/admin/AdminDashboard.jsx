@@ -19,8 +19,6 @@ export default function AdminDashboard() {
 />
 
 
-        
-
         <div className="p-4 w-100 overflow-auto">
           <h4 className="fw-bold">Welcome Admin</h4>
           <p className="text-muted">

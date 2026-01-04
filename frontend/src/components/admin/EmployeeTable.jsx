@@ -34,6 +34,7 @@ export default function EmployeeTable() {
         <div className="card-body">
           <h5 className="card-title mb-3">Employee List</h5>
 
+          {/* Add horizontal scrolling for responsiveness */}
           <div className="table-responsive">
             <table className="table table-bordered table-hover mb-0">
               <thead className="table-secondary">
@@ -63,29 +64,23 @@ export default function EmployeeTable() {
                   <tr key={e.employeeId}>
                     <td>{e.employeeId}</td>
                     <td>{e.name}</td>
-
-                    {/* PHOTO */}
                     <td>
-  {e.photo ? (
-    <img
-      src={`http://localhost:5000/${e.photo}`}
-      alt={e.name}
-      width="40"
-      height="40"
-      className="rounded"
-    />
-  ) : (
-    "-"
-  )}
-</td>
-
-
+                      {e.photo ? (
+                        <img
+                          src={`${BASE_URL}/${e.photo}`}
+                          alt={e.name}
+                          width="40"
+                          height="40"
+                          className="rounded"
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </td>
                     <td>{e.dob}</td>
                     <td>{e.mobile}</td>
                     <td>{e.email}</td>
                     <td>{e.role}</td>
-
-                    {/* BARCODE */}
                     <td>
                       {e.barcode ? (
                         <img
@@ -99,7 +94,6 @@ export default function EmployeeTable() {
                         "-"
                       )}
                     </td>
-
                     <td>
                       <button
                         className="btn btn-warning btn-sm me-1"
@@ -107,7 +101,6 @@ export default function EmployeeTable() {
                       >
                         Edit
                       </button>
-
                       <button
                         className="btn btn-danger btn-sm"
                         onClick={() => remove(e.employeeId)}
@@ -118,7 +111,6 @@ export default function EmployeeTable() {
                   </tr>
                 ))}
               </tbody>
-
             </table>
           </div>
         </div>
