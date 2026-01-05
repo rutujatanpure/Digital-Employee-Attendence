@@ -196,7 +196,7 @@ export default function EmployeeForm() {
       </div>
 
       <button type="submit" className="btn btn-success mt-4 w-100">
-        Add Employee
+       Submit
       </button>
     </form>
   );

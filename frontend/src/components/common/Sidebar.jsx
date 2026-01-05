@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  FaTachometerAlt,
   FaUserPlus,
   FaUsers,
   FaCheckSquare,
@@ -13,11 +12,11 @@ import "./Sidebar.css";
 
 function Sidebar() {
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false); // Collapsed/Expanded sidebar state
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768); // Detecting mobile responsiveness
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const handleToggle = () => {
-    setCollapsed((prev) => !prev); // Toggle collapse or expand
+    setMobileOpen((prev) => !prev);
   };
 
   const handleLogout = () => {
@@ -25,84 +24,70 @@ function Sidebar() {
     navigate("/", { replace: true });
   };
 
-  // Handle screen resizing (auto-collapse on mobile)
   useEffect(() => {
     const handleResize = () => {
       const mobileView = window.innerWidth < 768;
       setIsMobile(mobileView);
-
-      if (!mobileView) setCollapsed(false); // Expand sidebar automatically on desktop
+      if (!mobileView) setMobileOpen(false); // desktop always open
     };
-
     window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const menuItems = [
-    { label: "Dashboard", icon: <FaTachometerAlt />, path: "/admin" },
-    { label: "Create Employee ID", icon: <FaUserPlus />, path: "/admin/add" },
     { label: "Employee List", icon: <FaUsers />, path: "/admin/employees" },
+    { label: "Create Employee ID", icon: <FaUserPlus />, path: "/admin/add" },
     { label: "Attendance", icon: <FaCheckSquare />, path: "/admin/attendance" },
     { label: "Attendance Report", icon: <FaFileAlt />, path: "/admin/attendance-report" },
   ];
 
   return (
-    <div
-      className={`sidebar ${collapsed && isMobile ? "collapsed-mobile" : ""} ${
-        collapsed ? "collapsed" : ""
-      }`}
-      role="navigation"
-      aria-label={isMobile ? "Mobile Sidebar" : "Desktop Sidebar"}
-    >
-      <div className="sidebar-header">
-        <button
-          className="btn-toggle"
-          onClick={handleToggle}
-          aria-label="Toggle Sidebar"
-        >
+    <>
+      {/* Mobile toggle button */}
+      {isMobile && (
+        <button className="btn-toggle-mobile" onClick={handleToggle}>
           <FaBars />
         </button>
-        {!collapsed && <h3 className="sidebar-title">Admin Menu</h3>}
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`sidebar ${
+          isMobile ? (mobileOpen ? "open-mobile" : "closed-mobile") : ""
+        }`}
+      >
+        <div className="sidebar-header">
+          <span className="sidebar-title">Admin Menu</span>
+        </div>
+
+        <ul className="sidebar-menu">
+          <div className="menu-top">
+            {menuItems.map((item, index) => (
+              <li key={index} className="sidebar-item">
+                <Link to={item.path} className="sidebar-link">
+                  <span className="sidebar-icon">{item.icon}</span>
+                  <span className="sidebar-label">{item.label}</span>
+                </Link>
+              </li>
+            ))}
+          </div>
+
+          <div className="menu-bottom">
+            <li>
+              <button onClick={handleLogout} className="sidebar-link logout-btn">
+                <span className="sidebar-icon">
+                  <FaSignOutAlt />
+                </span>
+                <span className="sidebar-label">Logout</span>
+              </button>
+            </li>
+          </div>
+        </ul>
       </div>
 
-      <ul className="sidebar-menu">
-        {menuItems.map((item, index) => (
-          <li key={index} className="sidebar-item">
-            <Link
-              to={item.path}
-              className="sidebar-link"
-              title={collapsed ? item.label : ""} // Tooltip in collapsed mode
-            >
-              <span className="sidebar-icon">{item.icon}</span>
-              {/* Display label fully */}
-              <span className={`sidebar-label ${collapsed ? "hidden-label" : ""}`}>
-                {item.label}
-              </span>
-            </Link>
-          </li>
-        ))}
-
-        {/* Logout */}
-        <li>
-          <button
-            onClick={handleLogout}
-            className="sidebar-link logout-btn"
-            aria-label="Logout"
-            title={collapsed ? "Logout" : ""} // Tooltip when collapsed
-          >
-            <span className="sidebar-icon">
-              <FaSignOutAlt />
-            </span>
-            <span className={`sidebar-label ${collapsed ? "hidden-label" : ""}`}>
-              Logout
-            </span>
-          </button>
-        </li>
-      </ul>
-    </div>
+      {/* Overlay for mobile */}
+      {isMobile && mobileOpen && <div className="sidebar-overlay" onClick={handleToggle} />}
+    </>
   );
 }
 

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../services/api";
 import loginImage from "../../assets/images/empd.png";
-import PublicNavbar from "../../components/common/PublicNavbar";
 import "./Home.css";
 
 export default function Home() {
@@ -30,7 +29,8 @@ export default function Home() {
         );
 
         localStorage.setItem("token", res.data.token);
-        navigate("/admin");
+        navigate("/admin/employees");
+
       }
       // EMPLOYEE LOGIN
       else {
@@ -53,88 +53,72 @@ export default function Home() {
   };
 
   return (
-    <>
-      {/* TOP NAVBAR */}
-      <PublicNavbar />
+    <div className="home-bg">
+      <div className="container pt-3 pb-2">
+        <div className="row justify-content-center">
+          <div className="col-lg-10 col-xl-9">
+            <div className="card login-wrapper shadow-lg overflow-hidden">
+              <div className="row g-0">
 
-      <div className="home-bg">
-        <div className="container pt-3 pb-2">
+                {/* LOGIN FORM */}
+                <div className="col-12 col-md-6">
+                  <div className="p-4 p-md-5 h-100 d-flex flex-column justify-content-center">
+                    <h4 className="fw-bold mb-4 text-center">Login</h4>
 
-          {/* WELCOME TEXT */}
-          <div className="text-center mb-4">
-            <h3 className="fw-bold">Welcome to Attendance System</h3>
-            <p className="text-muted">
-              Secure • Paperless • Fast Employee Login
-            </p>
-          </div>
-
-          <div className="row justify-content-center">
-            <div className="col-lg-10 col-xl-9">
-
-              <div className="card login-wrapper shadow-lg overflow-hidden">
-                <div className="row g-0">
-
-                  {/* LOGIN FORM */}
-                  <div className="col-12 col-md-6">
-                    <div className="p-4 p-md-5 h-100 d-flex flex-column justify-content-center">
-                      <h4 className="fw-bold mb-4 text-center">Login</h4>
-
-                      <div className="mb-3">
-                        <label className="form-label fw-semibold">
-                          User ID
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Enter Your ID"
-                          value={userId}
-                          onChange={(e) => setUserId(e.target.value)}
-                        />
-                      </div>
-
-                      <div className="mb-3">
-                        <label className="form-label fw-semibold">
-                          Password
-                        </label>
-                        <input
-                          type="password"
-                          className="form-control"
-                          placeholder="Enter your password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                        />
-                      </div>
-
-                      <button
-                        className="btn btn-primary w-100 mt-3"
-                        onClick={handleLogin}
-                        disabled={loading}
-                      >
-                        {loading ? "Logging in..." : "Login"}
-                      </button>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">
+                        User ID
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Enter Your ID"
+                        value={userId}
+                        onChange={(e) => setUserId(e.target.value)}
+                      />
                     </div>
-                  </div>
 
-                  {/* IMAGE */}
-                  <div className="col-12 col-md-6 d-flex align-items-center justify-content-center bg-light">
-                    <img
-                      src={loginImage}
-                      alt="Login"
-                      className="img-fluid login-image"
-                    />
-                  </div>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">
+                        Password
+                      </label>
+                      <input
+                        type="password"
+                        className="form-control"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                    </div>
 
+                    <button
+                      className="btn btn-primary w-100 mt-3"
+                      onClick={handleLogin}
+                      disabled={loading}
+                    >
+                      {loading ? "Logging in..." : "Login"}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
+                {/* IMAGE */}
+                <div className="col-12 col-md-6 d-flex align-items-center justify-content-center bg-light">
+                  <img
+                    src={loginImage}
+                    alt="Login"
+                    className="img-fluid login-image"
+                  />
+                </div>
+
+              </div>
             </div>
           </div>
-
-          <p className="text-center text-muted mt-4 small">
-            © {new Date().getFullYear()} Digital Employee ID System
-          </p>
         </div>
+
+        <p className="text-center text-muted mt-4 small">
+          © {new Date().getFullYear()} Digital Employee ID System
+        </p>
       </div>
-    </>
+    </div>
   );
 }
