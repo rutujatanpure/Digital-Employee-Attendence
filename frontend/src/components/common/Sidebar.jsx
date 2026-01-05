@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   FaUserPlus,
   FaUsers,
@@ -7,6 +7,7 @@ import {
   FaFileAlt,
   FaSignOutAlt,
   FaBars,
+  FaLayerGroup,
 } from "react-icons/fa";
 import "./Sidebar.css";
 
@@ -15,9 +16,7 @@ function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  const handleToggle = () => {
-    setMobileOpen((prev) => !prev);
-  };
+  const handleToggle = () => setMobileOpen((prev) => !prev);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -28,7 +27,7 @@ function Sidebar() {
     const handleResize = () => {
       const mobileView = window.innerWidth < 768;
       setIsMobile(mobileView);
-      if (!mobileView) setMobileOpen(false); // desktop always open
+      if (!mobileView) setMobileOpen(false);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -38,12 +37,16 @@ function Sidebar() {
     { label: "Employee List", icon: <FaUsers />, path: "/admin/employees" },
     { label: "Create Employee ID", icon: <FaUserPlus />, path: "/admin/add" },
     { label: "Attendance", icon: <FaCheckSquare />, path: "/admin/attendance" },
-    { label: "Attendance Report", icon: <FaFileAlt />, path: "/admin/attendance-report" },
+    {
+      label: "Attendance Report",
+      icon: <FaFileAlt />,
+      path: "/admin/attendance-report",
+    },
   ];
 
   return (
     <>
-      {/* Mobile toggle button */}
+      {/* Mobile Toggle */}
       {isMobile && (
         <button className="btn-toggle-mobile" onClick={handleToggle}>
           <FaBars />
@@ -56,22 +59,34 @@ function Sidebar() {
           isMobile ? (mobileOpen ? "open-mobile" : "closed-mobile") : ""
         }`}
       >
+        {/* Header */}
         <div className="sidebar-header">
-          <span className="sidebar-title">Admin Menu</span>
+          <div className="logo">
+            <FaLayerGroup />
+          </div>
+          <span className="sidebar-title">HR Pro Suite</span>
         </div>
 
+        {/* Menu */}
         <ul className="sidebar-menu">
+          {/* Top Menu Items */}
           <div className="menu-top">
             {menuItems.map((item, index) => (
               <li key={index} className="sidebar-item">
-                <Link to={item.path} className="sidebar-link">
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `sidebar-link ${isActive ? "active" : ""}`
+                  }
+                >
                   <span className="sidebar-icon">{item.icon}</span>
                   <span className="sidebar-label">{item.label}</span>
-                </Link>
+                </NavLink>
               </li>
             ))}
           </div>
 
+          {/* Bottom Logout */}
           <div className="menu-bottom">
             <li>
               <button onClick={handleLogout} className="sidebar-link logout-btn">
@@ -85,8 +100,10 @@ function Sidebar() {
         </ul>
       </div>
 
-      {/* Overlay for mobile */}
-      {isMobile && mobileOpen && <div className="sidebar-overlay" onClick={handleToggle} />}
+      {/* Mobile Overlay */}
+      {isMobile && mobileOpen && (
+        <div className="sidebar-overlay" onClick={handleToggle} />
+      )}
     </>
   );
 }

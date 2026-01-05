@@ -20,27 +20,21 @@ export default function Home() {
     setLoading(true);
 
     try {
-      // ADMIN LOGIN
       if (userId.includes("@")) {
-        const res = await API.post(
-          "/admin/login",
-          { email: userId.trim(), password },
-          { headers: { "Content-Type": "application/json" } }
-        );
+        const res = await API.post("/admin/login", {
+          email: userId.trim(),
+          password,
+        });
 
         localStorage.setItem("token", res.data.token);
         navigate("/admin/employees");
-
-      }
-      // EMPLOYEE LOGIN
-      else {
+      } else {
         const employeeId = userId.trim().toUpperCase();
 
-        const res = await API.post(
-          "/employees/login",
-          { employeeId, password },
-          { headers: { "Content-Type": "application/json" } }
-        );
+        const res = await API.post("/employees/login", {
+          employeeId,
+          password,
+        });
 
         localStorage.setItem("employeeToken", res.data.token);
         navigate(`/employee/${employeeId}`);
@@ -54,14 +48,23 @@ export default function Home() {
 
   return (
     <div className="home-bg">
-      <div className="container pt-3 pb-2">
+      <div className="container">
         <div className="row justify-content-center">
           <div className="col-lg-10 col-xl-9">
-            <div className="card login-wrapper shadow-lg overflow-hidden">
+            <div className="card login-wrapper shadow-lg">
               <div className="row g-0">
 
+                {/* IMAGE */}
+                <div className="col-12 col-md-6 order-1 order-md-2 d-flex align-items-center justify-content-center bg-light">
+                  <img
+                    src={loginImage}
+                    alt="Login"
+                    className="img-fluid login-image"
+                  />
+                </div>
+
                 {/* LOGIN FORM */}
-                <div className="col-12 col-md-6">
+                <div className="col-12 col-md-6 order-2 order-md-1">
                   <div className="p-4 p-md-5 h-100 d-flex flex-column justify-content-center">
                     <h4 className="fw-bold mb-4 text-center">Login</h4>
 
@@ -99,15 +102,6 @@ export default function Home() {
                       {loading ? "Logging in..." : "Login"}
                     </button>
                   </div>
-                </div>
-
-                {/* IMAGE */}
-                <div className="col-12 col-md-6 d-flex align-items-center justify-content-center bg-light">
-                  <img
-                    src={loginImage}
-                    alt="Login"
-                    className="img-fluid login-image"
-                  />
                 </div>
 
               </div>
