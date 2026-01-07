@@ -16,8 +16,8 @@ const generateBarcode = async (employeeId) => {
     text: employeeId,
     scale: 3,
     height: 10,
-    includetext: true,
-    textxalign: "center",
+    //includetext: false,
+    //textxalign: "center",
   });
 
   // THIS LINE FIXES ENOENT

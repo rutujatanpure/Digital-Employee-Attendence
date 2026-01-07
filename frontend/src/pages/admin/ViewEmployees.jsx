@@ -6,14 +6,12 @@ export default function ViewEmployees() {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  // Listen to window resize
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Listen to sidebar collapsed state (example via localStorage)
   useEffect(() => {
     const handleCollapsed = () => {
       const isCollapsed = localStorage.getItem("sidebar-collapsed") === "true";
@@ -42,14 +40,8 @@ export default function ViewEmployees() {
           height: "100vh",
         }}
       >
-        <div className="card shadow-sm h-100 d-flex flex-column">
-          <div className="card-body flex-grow-1 overflow-auto">
-            {/* Wrap EmployeeTable in a responsive div for mobile */}
-            <div className="table-responsive">
-              <EmployeeTable />
-            </div>
-          </div>
-        </div>
+        <h2 className="text-center mb-4">Employee List</h2>
+        <EmployeeTable />
       </div>
     </div>
   );
