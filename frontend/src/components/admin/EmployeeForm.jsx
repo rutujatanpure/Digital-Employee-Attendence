@@ -89,7 +89,7 @@ export default function EmployeeForm() {
     const formData = new FormData();
     formData.append("name", emp.name);
     formData.append("dob", emp.dob);
-    formData.append("mobile", emp.mobile); // append as-is
+    formData.append("mobile", emp.mobile); 
     formData.append("email", emp.email);
     formData.append("role", emp.role);
     if (emp.photo) formData.append("photo", emp.photo);
@@ -148,35 +148,38 @@ export default function EmployeeForm() {
             />
             {errors.email && <div className="invalid-feedback">{errors.email}</div>}
           </div>
-
           {/* Mobile */}
-          <div className="col-md-6">
-            <label className="form-label">Mobile *</label>
+      <div className="col-md-6">
+        <label className="form-label">Mobile *</label>
             <PhoneInput
-              country="in"
-              countryCodeEditable={false}
-              enableSearch={true}
-              value={emp.mobile}
-              onChange={(phone) => setEmp({ ...emp, mobile: phone })}
-              containerClass="w-100"
-              inputClass={errors.mobile ? "is-invalid" : ""}
-              inputStyle={{
-                width: "100%",
-                height: "45px",
-                padding: "0.375rem 0.75rem",
-                fontSize: "1rem",
-                boxSizing: "border-box",
-              }}
-              buttonStyle={{
-                border: "1px solid #ced4da",
-                height: "38px",
-              }}
-              dropdownStyle={{ maxHeight: "200px" }}
-            />
-            {errors.mobile && (
-              <div className="invalid-feedback d-block">{errors.mobile}</div>
-            )}
-          </div>
+             country="in"
+           countryCodeEditable={false}
+          enableSearch={true}
+        value={emp.mobile}
+       onChange={(phone) =>
+      setEmp({ ...emp, mobile: `+${phone}` })
+    }
+    containerClass="w-100"
+    inputClass={errors.mobile ? "is-invalid" : ""}
+    inputStyle={{
+      width: "100%",
+      height: "45px",
+      padding: "0.375rem 0.75rem",
+      fontSize: "1rem",
+      boxSizing: "border-box",
+    }}
+    buttonStyle={{
+      border: "1px solid #ced4da",
+      height: "38px",
+    }}
+    dropdownStyle={{ maxHeight: "200px" }}
+  />
+  {errors.mobile && (
+    <div className="invalid-feedback d-block">
+      {errors.mobile}
+    </div>
+  )}
+</div>
 
           {/* DOB */}
           <div className="col-md-6">

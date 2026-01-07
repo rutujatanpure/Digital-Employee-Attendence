@@ -40,7 +40,7 @@ export default function ViewEmployees() {
           height: "100vh",
         }}
       >
-        <h2 className="text-center mb-4">Employee List</h2>
+        <h2 className="text-center mb-3">Employee List</h2>
         <EmployeeTable />
       </div>
     </div>

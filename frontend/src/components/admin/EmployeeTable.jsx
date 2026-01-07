@@ -11,13 +11,7 @@ const BASE_URL = "http://localhost:5000";
 export default function EmployeeTable() {
   const [emps, setEmps] = useState([]);
   const [filteredEmps, setFilteredEmps] = useState([]);
-  const [filters, setFilters] = useState({
-    employeeId: "",
-    name: "",
-    email: "",
-    mobile: "",
-    role: "",
-  });
+  const [search, setSearch] = useState("");
 
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
@@ -39,54 +33,37 @@ export default function EmployeeTable() {
     load();
   }, []);
 
-  // ================= FILTER (LIKE SEARCH) =================
+  // ================= GLOBAL SEARCH =================
   useEffect(() => {
-    const filtered = emps.filter((emp) => {
+    const q = search.toLowerCase();
+
+    const filtered = emps.filter((e) => {
+      const dob = e.dob ? formatDate(e.dob).toLowerCase() : "";
+
       return (
-        emp.employeeId?.toLowerCase().includes(filters.employeeId.toLowerCase()) &&
-        emp.name?.toLowerCase().includes(filters.name.toLowerCase()) &&
-        emp.email?.toLowerCase().includes(filters.email.toLowerCase()) &&
-        emp.mobile?.toLowerCase().includes(filters.mobile.toLowerCase()) &&
-        emp.role?.toLowerCase().includes(filters.role.toLowerCase())
+        e.employeeId?.toLowerCase().includes(q) ||
+        e.name?.toLowerCase().includes(q) ||
+        e.email?.toLowerCase().includes(q) ||
+        e.mobile?.toLowerCase().includes(q) ||
+        e.role?.toLowerCase().includes(q) ||
+        dob.includes(q)
       );
     });
+
     setFilteredEmps(filtered);
-  }, [filters, emps]);
+  }, [search, emps]);
 
   // ================= DELETE =================
   const remove = async (id) => {
-    const modal = document.createElement("div");
-    modal.style.position = "fixed";
-    modal.style.top = "0";
-    modal.style.left = "0";
-    modal.style.width = "100vw";
-    modal.style.height = "100vh";
-    modal.style.background = "rgba(0,0,0,0.4)";
-    modal.style.display = "flex";
-    modal.style.justifyContent = "center";
-    modal.style.alignItems = "center";
-    modal.style.zIndex = "9999";
+    if (!window.confirm("Are you sure you want to delete this employee?")) return;
 
-    modal.innerHTML = `
-      <div style="background:#fff; padding:20px; border-radius:8px; min-width:300px; text-align:center;">
-        <p>Are you sure you want to delete this employee?</p>
-        <button id="yesBtn" style="margin-right:10px;">Yes</button>
-        <button id="noBtn">No</button>
-      </div>
-    `;
-    document.body.appendChild(modal);
-
-    document.getElementById("noBtn").onclick = () => document.body.removeChild(modal);
-    document.getElementById("yesBtn").onclick = async () => {
-      try {
-        await API.delete(`/employees/${id}`);
-        toast.success("Employee deleted successfully");
-        load();
-      } catch {
-        toast.error("Failed to delete employee");
-      }
-      document.body.removeChild(modal);
-    };
+    try {
+      await API.delete(`/employees/${id}`);
+      toast.success("Employee deleted successfully");
+      load();
+    } catch {
+      toast.error("Failed to delete employee");
+    }
   };
 
   const handleEdit = (id) => navigate(`/admin/edit/${id}`);
@@ -102,86 +79,58 @@ export default function EmployeeTable() {
   };
 
   const formatDate = (dob) => {
-    if (!dob) return "-";
-    const d = new Date(dob);
-    return `${d.getDate().toString().padStart(2, "0")}-${(d.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${d.getFullYear()}`;
-  };
+  if (!dob) return "-";
+
+  const d = new Date(dob);
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+};
 
   return (
     <div className="container-fluid px-0">
       <ToastContainer position="top-right" autoClose={3000} />
 
-      <div className="table-responsive">
-        <table className="table table-sm table-bordered table-hover align-middle">
-          <thead className="table-light">
+      {/*  SEARCH BOX */}
+      <div className="d-flex justify-content-end mb-2 px-2">
+        <input
+          type="text"
+          className="form-control form-control-sm"
+          style={{ width: 320 }}
+          placeholder="Search by ID, name, role, email, mobile, DOB"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
+      {/*  TABLE WITH SCROLL */}
+      <div
+        className="table-responsive"
+        style={{
+          maxHeight: "70vh",
+          overflowX: "auto",
+          overflowY: "auto",
+          border: "1px solid #dee2e6",
+        }}
+      >
+        <table
+          className="table table-sm table-bordered table-hover align-middle text-center"
+          style={{ minWidth: "1400px" }}
+        >
+          <thead className="table-light sticky-top">
             <tr>
-              <th style={{ minWidth: 130 }}>
-                Employee ID
-                <input
-                  className="form-control form-control-sm mt-1"
-                  placeholder="Filter by ID"
-                  value={filters.employeeId}
-                  onChange={(e) =>
-                    setFilters({ ...filters, employeeId: e.target.value })
-                  }
-                />
-              </th>
-
-              <th style={{ minWidth: 150 }}>
-                Name
-                <input
-                  className="form-control form-control-sm mt-1"
-                  placeholder="Filter by name"
-                  value={filters.name}
-                  onChange={(e) =>
-                    setFilters({ ...filters, name: e.target.value })
-                  }
-                />
-              </th>
-
-              <th style={{ minWidth: 200 }}>
-                Email
-                <input
-                  className="form-control form-control-sm mt-1"
-                  placeholder="Filter by email"
-                  value={filters.email}
-                  onChange={(e) =>
-                    setFilters({ ...filters, email: e.target.value })
-                  }
-                />
-              </th>
-
-              <th style={{ minWidth: 140 }}>
-                Mobile
-                <input
-                  className="form-control form-control-sm mt-1"
-                  placeholder="Filter by mobile"
-                  value={filters.mobile}
-                  onChange={(e) =>
-                    setFilters({ ...filters, mobile: e.target.value })
-                  }
-                />
-              </th>
-
-              <th style={{ minWidth: 120 }}>
-                Role
-                <input
-                  className="form-control form-control-sm mt-1"
-                  placeholder="Filter by role"
-                  value={filters.role}
-                  onChange={(e) =>
-                    setFilters({ ...filters, role: e.target.value })
-                  }
-                />
-              </th>
-
+              <th>Employee ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Mobile</th>
+              <th>Role</th>
               <th>DOB</th>
               <th>Photo</th>
               <th>Barcode</th>
-              <th className="text-center">ID Card</th>
-              <th className="text-center">Actions</th>
+              <th>ID Card</th>
+              <th>Actions</th>
             </tr>
           </thead>
 
@@ -197,10 +146,17 @@ export default function EmployeeTable() {
             {filteredEmps.map((e) => (
               <tr key={e.employeeId}>
                 <td>{e.employeeId}</td>
-                <td>{e.name}</td>
-                <td>{e.email || "-"}</td>
+
+                <td className="fw-medium">{e.name}</td>
+
+                <td style={{ maxWidth: 220, wordBreak: "break-word" }}>
+                  {e.email || "-"}
+                </td>
+
                 <td>{e.mobile || "-"}</td>
-                <td>{e.role || "-"}</td>
+
+                <td className="text-capitalize">{e.role || "-"}</td>
+
                 <td>{formatDate(e.dob)}</td>
 
                 <td>
@@ -208,9 +164,9 @@ export default function EmployeeTable() {
                     <img
                       src={`${BASE_URL}/${e.photo}`}
                       alt={e.name}
-                      width="32"
-                      height="32"
-                      className="rounded"
+                      width="36"
+                      height="36"
+                      className="rounded d-block mx-auto"
                     />
                   ) : (
                     "-"
@@ -222,15 +178,16 @@ export default function EmployeeTable() {
                     <img
                       src={`${BASE_URL}/${e.barcode}`}
                       alt="barcode"
-                      width="60"
+                      width="70"
                       height="30"
+                      className="d-block mx-auto"
                     />
                   ) : (
                     "-"
                   )}
                 </td>
 
-                <td className="text-center">
+                <td>
                   <button
                     className="btn btn-sm btn-light"
                     onClick={() => handleShowIdCard(e.employeeId)}
@@ -239,7 +196,7 @@ export default function EmployeeTable() {
                   </button>
                 </td>
 
-                <td className="text-center">
+                <td>
                   <button
                     className="btn btn-sm btn-light me-1"
                     onClick={() => handleEdit(e.employeeId)}
