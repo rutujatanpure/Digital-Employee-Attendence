@@ -20,7 +20,7 @@ export default function EditEmployee() {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  // ✅ useCallback to fix ESLint warning
+  
   const loadEmployee = useCallback(async () => {
     try {
       const res = await API.get(`/employees/${id}`);
