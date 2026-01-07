@@ -1,48 +1,82 @@
-/* Ensure the table container is scrollable */
-.table-responsive {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling for mobile */
+/* Container adjustments */
+.flex-grow-1.d-flex.flex-column {
+  height: 100%;
+  overflow: hidden;
 }
 
-/* Prevent text wrapping and skewing of columns */
+
+/* Top controls: search + year filter */
+.d-flex.justify-content-between.align-items-center.mb-3 {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Search input */
+input.form-control {
+  min-width: 200px;
+  max-width: 400px;
+}
+
+/* Year filter dropdown */
+select.form-select {
+  min-width: 120px;
+  max-width: 200px;
+}
+
+/* Table styles */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; 
+}
+
 table {
   width: 100%;
-  min-width: 800px; /* Minimum width for columns to fit properly */
+  min-width: 800px; /* ensure horizontal scroll on small screens */
   border-collapse: collapse;
 }
 
 th, td {
-  white-space: nowrap; /* Prevent text wrapping */
+  white-space: nowrap; 
   text-align: center;
   vertical-align: middle;
   padding: 10px;
-  font-size: 0.9rem; /* Adjust font size for readability */
+  font-size: 0.9rem; 
 }
 
 .table-light {
-  background-color: #f8f9fa; /* Style for table header */
+  background-color: #f8f9fa; 
 }
 
 .badge {
   font-size: 0.8rem;
+  padding: 0.4em 0.6em;
 }
 
-/* Responsive adjustments for smaller screens */
+/* Mobile adjustments */
 @media (max-width: 768px) {
   th, td {
-    font-size: 0.85rem; /* Reduce font size */
-    padding: 5px; /* Reduce padding */
+    font-size: 0.85rem; 
+    padding: 6px; 
   }
 
   .badge {
     font-size: 0.7rem;
   }
+
+  /* Stack search + filter on small screens */
+  .d-flex.justify-content-between.align-items-center.mb-3 {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  input.form-control, select.form-select {
+    width: 100%;
+  }
 }
 
-/* Further compression for very small screens */
 @media (max-width: 576px) {
   th, td {
-    font-size: 0.75rem; /* Further reduce font size */
+    font-size: 0.75rem; 
     padding: 4px;
   }
 

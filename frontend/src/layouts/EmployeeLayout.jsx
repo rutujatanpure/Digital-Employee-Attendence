@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { FaSignOutAlt } from "react-icons/fa"; 
+
 export default function EmployeeLayout({ children }) {
   const [showLogout, setShowLogout] = useState(false);
   const navigate = useNavigate();
@@ -8,22 +10,23 @@ export default function EmployeeLayout({ children }) {
   const handleLogout = () => {
     localStorage.removeItem("employeeToken");
     setShowLogout(false);
-    navigate("/"); // redirect to login page
+    navigate("/"); 
   };
 
   return (
     <div className="position-relative">
-      {/* Logout Toggle Button at Top-Right */}
+      {/*  Logout Icon at Top-Right */}
       <div className="position-absolute top-0 end-0 p-3">
         <button
-          className="btn btn-outline-danger"
+          className="btn btn-outline-danger rounded-circle p-2"
+          style={{ fontSize: "1.2rem" }}
           onClick={() => setShowLogout(true)}
         >
-          Logout
+          <FaSignOutAlt />
         </button>
       </div>
 
-      {/* Logout Confirmation Modal */}
+      {/*  Logout Confirmation Modal */}
       {showLogout && (
         <div
           className="modal fade show d-block"

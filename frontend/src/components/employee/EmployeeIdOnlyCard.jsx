@@ -1,3 +1,5 @@
+import companyLogo from "../../assets/images/logo.png";
+
 export default function EmployeeIdOnlyCard({ emp }) {
   if (!emp) return null;
 
@@ -8,28 +10,96 @@ export default function EmployeeIdOnlyCard({ emp }) {
         width: "260px",
         height: "420px",
         borderRadius: "16px",
-        border: "1px solid #e0e0e0",
+        border: "1px solid #d0d7e2",
         backgroundColor: "#ffffff",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
+        position: "relative",
       }}
     >
-      {/* GREEN STRAIGHT STRIP */}
+      {/* 🔵 LEFT SIDE BORDER */}
       <div
         style={{
-          height: "50px",
-          background: "linear-gradient(90deg, #1e9e4a, #2ecc71)",
+          position: "absolute",
+          left: 0,
+          top: 0,
+          height: "100%",
+          width: "6px",
+          background: "linear-gradient(180deg, #0d6efd, #0a58ca)",
         }}
       />
 
-      {/* CONTENT */}
+      {/* 🔵 RIGHT SIDE BORDER */}
+      <div
+        style={{
+          position: "absolute",
+          right: 0,
+          top: 0,
+          height: "100%",
+          width: "6px",
+          background: "linear-gradient(180deg, #0d6efd, #0a58ca)",
+        }}
+      />
+
+      {/* 🔵 BOTTOM BORDER */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          bottom: 0,
+          width: "100%",
+          height: "6px",
+          background: "linear-gradient(90deg, #0d6efd, #0a58ca)",
+        }}
+      />
+
+      {/* 🔵 TOP BLUE BELT */}
+      <div
+        style={{
+          height: "65px",
+          background: "linear-gradient(90deg, #0d6efd, #0a58ca)",
+          display: "flex",
+          alignItems: "center",
+          padding: "0 14px 0 20px",
+          gap: "12px",
+        }}
+      >
+        {/* COMPANY LOGO */}
+        <img
+          src={companyLogo}
+          alt="Nova Tech Solution Logo"
+          style={{
+            height: "42px",
+            width: "42px",
+            objectFit: "contain",
+            backgroundColor: "#ffffff",
+            borderRadius: "8px",
+            padding: "5px",
+          }}
+        />
+
+        {/* COMPANY NAME */}
+        <span
+          style={{
+            color: "#ffffff",
+            fontSize: "18px",
+            fontWeight: "400",
+            letterSpacing: "0.6px",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Nova Tech Solution
+        </span>
+      </div>
+
+      {/* ================= CONTENT ================= */}
       <div
         style={{
           padding: "18px",
           textAlign: "center",
           flex: 1,
-           backgroundColor: "#dbdfe3ff", 
+          backgroundColor: "#f1f4f9",
         }}
       >
         {/* EMPLOYEE IMAGE */}
@@ -44,28 +114,29 @@ export default function EmployeeIdOnlyCard({ emp }) {
               objectFit: "cover",
               borderRadius: "14px",
               marginBottom: "12px",
-              border: "3px solid #f1f1f1",
+              border: "3px solid #ffffff",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
             }}
           />
         )}
 
-        {/* NAME */}
+        {/* EMPLOYEE NAME */}
         <h5
           style={{
             margin: "6px 0 4px",
             fontWeight: "600",
-            color: "#222",
+            color: "#1f2937",
           }}
         >
           {emp.name}
         </h5>
 
-        {/* ROLE */}
+        {/* EMPLOYEE ROLE */}
         <p
           style={{
             margin: "0 0 16px",
             fontSize: "14px",
-            color: "#666",
+            color: "#4b5563",
             fontWeight: "500",
           }}
         >
@@ -82,7 +153,7 @@ export default function EmployeeIdOnlyCard({ emp }) {
               width: "100%",
               height: "50px",
               objectFit: "contain",
-              marginTop: "9px",
+              marginTop: "10px",
             }}
           />
         )}

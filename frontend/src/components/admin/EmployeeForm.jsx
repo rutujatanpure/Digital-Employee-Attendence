@@ -4,6 +4,10 @@ import API from "../../services/api";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
+// Import Toast
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 export default function EmployeeForm() {
   const navigate = useNavigate();
 
@@ -59,7 +63,6 @@ export default function EmployeeForm() {
     else if (calculateAge(emp.dob) < 16)
       newErrors.dob = "Employee must be at least 16 years old";
 
-    // Only validate if user enters password
     if (emp.password || emp.confirmPassword) {
       if (emp.password.length < 6)
         newErrors.password = "Password must be at least 6 characters";
@@ -67,7 +70,6 @@ export default function EmployeeForm() {
         newErrors.confirmPassword = "Passwords do not match";
     }
 
-    // Optional: validate file size (< 2MB) and type
     if (emp.photo) {
       const validTypes = ["image/jpeg", "image/png", "image/jpg"];
       if (!validTypes.includes(emp.photo.type))
@@ -89,7 +91,7 @@ export default function EmployeeForm() {
     const formData = new FormData();
     formData.append("name", emp.name);
     formData.append("dob", emp.dob);
-    formData.append("mobile", emp.mobile); 
+    formData.append("mobile", emp.mobile);
     formData.append("email", emp.email);
     formData.append("role", emp.role);
     if (emp.photo) formData.append("photo", emp.photo);
@@ -100,17 +102,25 @@ export default function EmployeeForm() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Employee added successfully!");
+      toast.success("Employee added successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+
       navigate("/admin/employees");
     } catch (err) {
       console.error(err);
       const msg = err.response?.data?.message || "Error adding employee";
-      alert(msg);
+
+      toast.error(msg, {
+        position: "top-right",
+        autoClose: 4000,
+      });
     }
   };
 
   return (
-    <div className="card shadow p-4 w-100">
+    <>
       <form onSubmit={handleSubmit}>
         <div className="row g-3">
           {/* Name */}
@@ -148,38 +158,32 @@ export default function EmployeeForm() {
             />
             {errors.email && <div className="invalid-feedback">{errors.email}</div>}
           </div>
+
           {/* Mobile */}
-      <div className="col-md-6">
-        <label className="form-label">Mobile *</label>
+          <div className="col-md-6">
+            <label className="form-label">Mobile *</label>
             <PhoneInput
-             country="in"
-           countryCodeEditable={false}
-          enableSearch={true}
-        value={emp.mobile}
-       onChange={(phone) =>
-      setEmp({ ...emp, mobile: `+${phone}` })
-    }
-    containerClass="w-100"
-    inputClass={errors.mobile ? "is-invalid" : ""}
-    inputStyle={{
-      width: "100%",
-      height: "45px",
-      padding: "0.375rem 0.75rem",
-      fontSize: "1rem",
-      boxSizing: "border-box",
-    }}
-    buttonStyle={{
-      border: "1px solid #ced4da",
-      height: "38px",
-    }}
-    dropdownStyle={{ maxHeight: "200px" }}
-  />
-  {errors.mobile && (
-    <div className="invalid-feedback d-block">
-      {errors.mobile}
-    </div>
-  )}
-</div>
+              country="in"
+              countryCodeEditable={false}
+              enableSearch={true}
+              value={emp.mobile}
+              onChange={(phone) => setEmp({ ...emp, mobile: `+${phone}` })}
+              containerClass="w-100"
+              inputClass={errors.mobile ? "is-invalid" : ""}
+              inputStyle={{
+                width: "100%",
+                height: "45px",
+                padding: "0.375rem 0.75rem",
+                fontSize: "1rem",
+                boxSizing: "border-box",
+              }}
+              buttonStyle={{ border: "1px solid #ced4da", height: "38px" }}
+              dropdownStyle={{ maxHeight: "200px" }}
+            />
+            {errors.mobile && (
+              <div className="invalid-feedback d-block">{errors.mobile}</div>
+            )}
+          </div>
 
           {/* DOB */}
           <div className="col-md-6">
@@ -213,9 +217,7 @@ export default function EmployeeForm() {
                 type={showPassword ? "text" : "password"}
                 className={`form-control ${errors.password ? "is-invalid" : ""}`}
                 value={emp.password}
-                onChange={(e) =>
-                  setEmp({ ...emp, password: e.target.value })
-                }
+                onChange={(e) => setEmp({ ...emp, password: e.target.value })}
               />
               <span
                 className="input-group-text"
@@ -233,7 +235,9 @@ export default function EmployeeForm() {
             <div className="input-group">
               <input
                 type={showConfirmPassword ? "text" : "password"}
-                className={`form-control ${errors.confirmPassword ? "is-invalid" : ""}`}
+                className={`form-control ${
+                  errors.confirmPassword ? "is-invalid" : ""
+                }`}
                 value={emp.confirmPassword}
                 onChange={(e) =>
                   setEmp({ ...emp, confirmPassword: e.target.value })
@@ -242,9 +246,7 @@ export default function EmployeeForm() {
               <span
                 className="input-group-text"
                 style={{ cursor: "pointer" }}
-                onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
                 {showConfirmPassword ? "Hide" : "Show"}
               </span>
@@ -261,6 +263,9 @@ export default function EmployeeForm() {
           </button>
         </div>
       </form>
-    </div>
+
+      {/* Toast Container */}
+      <ToastContainer />
+    </>
   );
 }
