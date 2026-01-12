@@ -22,7 +22,7 @@ export default function AdminAttendanceReport() {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  // -------------------- FETCH REPORT --------------------
+  // FETCH REPORT 
   const fetchReport = async () => {
     if (!month || !year) {
       setError("Please select month and year");
@@ -49,7 +49,7 @@ export default function AdminAttendanceReport() {
         Array.from({ length: numDays }, (_, i) => dayShorts[(firstDay + i) % 7])
       );
 
-      // -------- TODAY BASED SUMMARY --------
+      // absent on TODAY basis SUMMARY
       const today = new Date();
       const todayDay = today.getDate();
       const todayMonth = today.getMonth() + 1;
@@ -83,7 +83,7 @@ export default function AdminAttendanceReport() {
     }
   };
 
-  // -------------------- EFFECTS --------------------
+  // EFFECTS 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
@@ -97,7 +97,7 @@ export default function AdminAttendanceReport() {
     return () => window.removeEventListener("storage", handleCollapsed);
   }, []);
 
-  // -------------------- HELPERS --------------------
+  //  HELPERS 
   const renderStatus = (status, day) => {
     const today = new Date();
     const cellDate = new Date(year, month - 1, day);
@@ -184,7 +184,7 @@ export default function AdminAttendanceReport() {
     "July", "August", "September", "October", "November", "December",
   ];
 
-  // -------------------- JSX --------------------
+ 
   return (
     <div className="d-flex" style={{ height: "100vh", backgroundColor: "#f5f7fa" }}>
       <Sidebar />
@@ -347,7 +347,7 @@ export default function AdminAttendanceReport() {
             ⚠️ {error}
           </div>
         )}
-         {/* ATTENDANCE LEGEND */}
+         {/* ATTENDANCE  */}
 <div
   style={{
     display: "flex",

@@ -3,10 +3,9 @@ import { useNavigate } from "react-router-dom";
 import API from "../../services/api";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-
-// Import Toast
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { FaEye, FaEyeSlash, FaLock, FaUser, FaEnvelope, FaPhone, FaCalendar, FaImage } from "react-icons/fa";
 
 export default function EmployeeForm() {
   const navigate = useNavigate();
@@ -25,6 +24,8 @@ export default function EmployeeForm() {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const generatePassword = (length = 8) => {
     const chars =
@@ -82,6 +83,18 @@ export default function EmployeeForm() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setEmp({ ...emp, photo: file });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
@@ -98,6 +111,7 @@ export default function EmployeeForm() {
     formData.append("password", passwordToUse);
 
     try {
+      setLoading(true);
       await API.post("/employees", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -111,161 +125,483 @@ export default function EmployeeForm() {
     } catch (err) {
       console.error(err);
       const msg = err.response?.data?.message || "Error adding employee";
-
       toast.error(msg, {
         position: "top-right",
         autoClose: 4000,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <>
-      <form onSubmit={handleSubmit}>
-        <div className="row g-3">
-          {/* Name */}
-          <div className="col-md-6">
-            <label className="form-label">Name *</label>
-            <input
-              type="text"
-              className={`form-control ${errors.name ? "is-invalid" : ""}`}
-              value={emp.name}
-              onChange={(e) => setEmp({ ...emp, name: e.target.value })}
-            />
-            {errors.name && <div className="invalid-feedback">{errors.name}</div>}
-          </div>
+    <div style={{ minHeight: "100vh", background: "#f8f9fa", padding: "2rem 0" }}>
+      <ToastContainer position="top-right" autoClose={3000} />
 
-          {/* Role */}
-          <div className="col-md-6">
-            <label className="form-label">Role *</label>
-            <input
-              type="text"
-              className={`form-control ${errors.role ? "is-invalid" : ""}`}
-              value={emp.role}
-              onChange={(e) => setEmp({ ...emp, role: e.target.value })}
-            />
-            {errors.role && <div className="invalid-feedback">{errors.role}</div>}
-          </div>
+      <div className="container" style={{ maxWidth: "900px" }}>
+        {/* FORM CARD */}
+        <div style={{
+          background: "#fff",
+          borderRadius: "0.75rem",
+          boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
+          padding: "2.5rem"
+        }}>
+          <form onSubmit={handleSubmit}>
+            <div className="row g-4">
+              {/* Name */}
+              <div className="col-md-6">
+                <label style={{
+                  display: "block",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  color: "#212529",
+                  marginBottom: "0.75rem"
+                }}>
+                  <FaUser style={{ marginRight: "0.5rem", color: "#667eea" }} />
+                  Full Name <span style={{ color: "#dc3545" }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter employee name"
+                  style={{
+                    width: "100%",
+                    padding: "0.75rem 1rem",
+                    border: errors.name ? "2px solid #dc3545" : "1px solid #dee2e6",
+                    borderRadius: "0.5rem",
+                    fontSize: "0.95rem",
+                    transition: "all 0.3s ease",
+                    boxSizing: "border-box",
+                    outline: "none"
+                  }}
+                  value={emp.name}
+                  onChange={(e) => setEmp({ ...emp, name: e.target.value })}
+                  onFocus={(e) => !errors.name && (e.target.style.borderColor = "#667eea")}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = errors.name ? "#dc3545" : "#dee2e6";
+                  }}
+                />
+                {errors.name && (
+                  <div style={{ color: "#dc3545", fontSize: "0.8rem", marginTop: "0.5rem" }}>
+                    {errors.name}
+                  </div>
+                )}
+              </div>
 
-          {/* Email */}
-          <div className="col-md-6">
-            <label className="form-label">Email *</label>
-            <input
-              type="email"
-              className={`form-control ${errors.email ? "is-invalid" : ""}`}
-              value={emp.email}
-              onChange={(e) => setEmp({ ...emp, email: e.target.value })}
-            />
-            {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-          </div>
+              {/* Role */}
+              <div className="col-md-6">
+                <label style={{
+                  display: "block",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  color: "#212529",
+                  marginBottom: "0.75rem"
+                }}>
+                  <FaUser style={{ marginRight: "0.5rem", color: "#667eea" }} />
+                  Role <span style={{ color: "#dc3545" }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., Developer, Manager, Designer"
+                  style={{
+                    width: "100%",
+                    padding: "0.75rem 1rem",
+                    border: errors.role ? "2px solid #dc3545" : "1px solid #dee2e6",
+                    borderRadius: "0.5rem",
+                    fontSize: "0.95rem",
+                    transition: "all 0.3s ease",
+                    boxSizing: "border-box",
+                    outline: "none"
+                  }}
+                  value={emp.role}
+                  onChange={(e) => setEmp({ ...emp, role: e.target.value })}
+                  onFocus={(e) => !errors.role && (e.target.style.borderColor = "#667eea")}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = errors.role ? "#dc3545" : "#dee2e6";
+                  }}
+                />
+                {errors.role && (
+                  <div style={{ color: "#dc3545", fontSize: "0.8rem", marginTop: "0.5rem" }}>
+                    {errors.role}
+                  </div>
+                )}
+              </div>
 
-          {/* Mobile */}
-          <div className="col-md-6">
-            <label className="form-label">Mobile *</label>
-            <PhoneInput
-              country="in"
-              countryCodeEditable={false}
-              enableSearch={true}
-              value={emp.mobile}
-              onChange={(phone) => setEmp({ ...emp, mobile: `+${phone}` })}
-              containerClass="w-100"
-              inputClass={errors.mobile ? "is-invalid" : ""}
-              inputStyle={{
-                width: "100%",
-                height: "45px",
-                padding: "0.375rem 0.75rem",
-                fontSize: "1rem",
-                boxSizing: "border-box",
-              }}
-              buttonStyle={{ border: "1px solid #ced4da", height: "38px" }}
-              dropdownStyle={{ maxHeight: "200px" }}
-            />
-            {errors.mobile && (
-              <div className="invalid-feedback d-block">{errors.mobile}</div>
-            )}
-          </div>
+              {/* Email */}
+              <div className="col-md-6">
+                <label style={{
+                  display: "block",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  color: "#212529",
+                  marginBottom: "0.75rem"
+                }}>
+                  <FaEnvelope style={{ marginRight: "0.5rem", color: "#667eea" }} />
+                  Email <span style={{ color: "#dc3545" }}>*</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="employee@example.com"
+                  style={{
+                    width: "100%",
+                    padding: "0.75rem 1rem",
+                    border: errors.email ? "2px solid #dc3545" : "1px solid #dee2e6",
+                    borderRadius: "0.5rem",
+                    fontSize: "0.95rem",
+                    transition: "all 0.3s ease",
+                    boxSizing: "border-box",
+                    outline: "none"
+                  }}
+                  value={emp.email}
+                  onChange={(e) => setEmp({ ...emp, email: e.target.value })}
+                  onFocus={(e) => !errors.email && (e.target.style.borderColor = "#667eea")}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = errors.email ? "#dc3545" : "#dee2e6";
+                  }}
+                />
+                {errors.email && (
+                  <div style={{ color: "#dc3545", fontSize: "0.8rem", marginTop: "0.5rem" }}>
+                    {errors.email}
+                  </div>
+                )}
+              </div>
 
-          {/* DOB */}
-          <div className="col-md-6">
-            <label className="form-label">Date of Birth *</label>
-            <input
-              type="date"
-              className={`form-control ${errors.dob ? "is-invalid" : ""}`}
-              value={emp.dob}
-              onChange={(e) => setEmp({ ...emp, dob: e.target.value })}
-            />
-            {errors.dob && <div className="invalid-feedback">{errors.dob}</div>}
-          </div>
+              {/* Mobile */}
+              <div className="col-md-6">
+                <label style={{
+                  display: "block",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  color: "#212529",
+                  marginBottom: "0.75rem"
+                }}>
+                  <FaPhone style={{ marginRight: "0.5rem", color: "#667eea" }} />
+                  Mobile <span style={{ color: "#dc3545" }}>*</span>
+                </label>
+                <div style={{ position: "relative" }}>
+                  <PhoneInput
+                    country="in"
+                    countryCodeEditable={false}
+                    enableSearch={true}
+                    value={emp.mobile}
+                    onChange={(phone) => setEmp({ ...emp, mobile: `+${phone}` })}
+                    containerClass="w-100"
+                    inputStyle={{
+                      width: "100%",
+                      height: "45px",
+                      padding: "0.75rem 0.75rem 0.75rem 50px",
+                      fontSize: "0.95rem",
+                      boxSizing: "border-box",
+                      border: errors.mobile ? "2px solid #dc3545" : "1px solid #dee2e6",
+                      borderRadius: "0.5rem",
+                      outline: "none",
+                      transition: "all 0.3s ease"
+                    }}
+                    buttonStyle={{ border: "none", height: "45px", background: "transparent" }}
+                    dropdownStyle={{ maxHeight: "200px" }}
+                  />
+                </div>
+                {errors.mobile && (
+                  <div style={{ color: "#dc3545", fontSize: "0.8rem", marginTop: "0.5rem" }}>
+                    {errors.mobile}
+                  </div>
+                )}
+              </div>
 
-          {/* Photo */}
-          <div className="col-md-6">
-            <label className="form-label">Photo</label>
-            <input
-              type="file"
-              className={`form-control ${errors.photo ? "is-invalid" : ""}`}
-              accept="image/*"
-              onChange={(e) => setEmp({ ...emp, photo: e.target.files[0] })}
-            />
-            {errors.photo && <div className="invalid-feedback">{errors.photo}</div>}
-          </div>
+              {/* DOB */}
+              <div className="col-md-6">
+                <label style={{
+                  display: "block",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  color: "#212529",
+                  marginBottom: "0.75rem"
+                }}>
+                  <FaCalendar style={{ marginRight: "0.5rem", color: "#667eea" }} />
+                  Date of Birth <span style={{ color: "#dc3545" }}>*</span>
+                </label>
+                <input
+                  type="date"
+                  style={{
+                    width: "100%",
+                    padding: "0.75rem 1rem",
+                    border: errors.dob ? "2px solid #dc3545" : "1px solid #dee2e6",
+                    borderRadius: "0.5rem",
+                    fontSize: "0.95rem",
+                    transition: "all 0.3s ease",
+                    boxSizing: "border-box",
+                    outline: "none"
+                  }}
+                  value={emp.dob}
+                  onChange={(e) => setEmp({ ...emp, dob: e.target.value })}
+                  onFocus={(e) => !errors.dob && (e.target.style.borderColor = "#667eea")}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = errors.dob ? "#dc3545" : "#dee2e6";
+                  }}
+                />
+                {errors.dob && (
+                  <div style={{ color: "#dc3545", fontSize: "0.8rem", marginTop: "0.5rem" }}>
+                    {errors.dob}
+                  </div>
+                )}
+              </div>
 
-          {/* Password */}
-          <div className="col-md-6">
-            <label className="form-label">Password</label>
-            <div className="input-group">
-              <input
-                type={showPassword ? "text" : "password"}
-                className={`form-control ${errors.password ? "is-invalid" : ""}`}
-                value={emp.password}
-                onChange={(e) => setEmp({ ...emp, password: e.target.value })}
-              />
-              <span
-                className="input-group-text"
-                style={{ cursor: "pointer" }}
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </span>
+              {/* Photo */}
+              <div className="col-md-6">
+                <label style={{
+                  display: "block",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  color: "#212529",
+                  marginBottom: "0.75rem"
+                }}>
+                  <FaImage style={{ marginRight: "0.5rem", color: "#667eea" }} />
+                  Profile Photo
+                </label>
+                <div style={{
+                  display: "flex",
+                  gap: "1rem",
+                  alignItems: "flex-start"
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                      style={{
+                        width: "100%",
+                        padding: "0.75rem 1rem",
+                        border: errors.photo ? "2px solid #dc3545" : "1px solid #dee2e6",
+                        borderRadius: "0.5rem",
+                        fontSize: "0.9rem",
+                        transition: "all 0.3s ease",
+                        boxSizing: "border-box",
+                        cursor: "pointer",
+                        outline: "none"
+                      }}
+                    />
+                    {errors.photo && (
+                      <div style={{ color: "#dc3545", fontSize: "0.8rem", marginTop: "0.5rem" }}>
+                        {errors.photo}
+                      </div>
+                    )}
+                    <p style={{ fontSize: "0.8rem", color: "#999", marginTop: "0.5rem", margin: 0 }}>
+                      JPG or PNG, max 2MB
+                    </p>
+                  </div>
+                  {photoPreview && (
+                    <div style={{
+                      width: "80px",
+                      height: "80px",
+                      borderRadius: "0.5rem",
+                      overflow: "hidden",
+                      border: "2px solid #dee2e6",
+                      flexShrink: 0
+                    }}>
+                      <img
+                        src={photoPreview}
+                        alt="Preview"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover"
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="col-md-6">
+                <label style={{
+                  display: "block",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  color: "#212529",
+                  marginBottom: "0.75rem"
+                }}>
+                  <FaLock style={{ marginRight: "0.5rem", color: "#667eea" }} />
+                  Password
+                </label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Leave empty for auto-generated password"
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem 1rem",
+                      paddingRight: "2.5rem",
+                      border: errors.password ? "2px solid #dc3545" : "1px solid #dee2e6",
+                      borderRadius: "0.5rem",
+                      fontSize: "0.95rem",
+                      transition: "all 0.3s ease",
+                      boxSizing: "border-box",
+                      outline: "none"
+                    }}
+                    value={emp.password}
+                    onChange={(e) => setEmp({ ...emp, password: e.target.value })}
+                    onFocus={(e) => !errors.password && (e.target.style.borderColor = "#667eea")}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = errors.password ? "#dc3545" : "#dee2e6";
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "0.75rem",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#667eea",
+                      fontSize: "1rem",
+                      padding: "0.5rem"
+                    }}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <div style={{ color: "#dc3545", fontSize: "0.8rem", marginTop: "0.5rem" }}>
+                    {errors.password}
+                  </div>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div className="col-md-6">
+                <label style={{
+                  display: "block",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  color: "#212529",
+                  marginBottom: "0.75rem"
+                }}>
+                  <FaLock style={{ marginRight: "0.5rem", color: "#667eea" }} />
+                  Confirm Password
+                </label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm your password"
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem 1rem",
+                      paddingRight: "2.5rem",
+                      border: errors.confirmPassword ? "2px solid #dc3545" : "1px solid #dee2e6",
+                      borderRadius: "0.5rem",
+                      fontSize: "0.95rem",
+                      transition: "all 0.3s ease",
+                      boxSizing: "border-box",
+                      outline: "none"
+                    }}
+                    value={emp.confirmPassword}
+                    onChange={(e) => setEmp({ ...emp, confirmPassword: e.target.value })}
+                    onFocus={(e) => !errors.confirmPassword && (e.target.style.borderColor = "#667eea")}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = errors.confirmPassword ? "#dc3545" : "#dee2e6";
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "0.75rem",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#667eea",
+                      fontSize: "1rem",
+                      padding: "0.5rem"
+                    }}
+                  >
+                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <div style={{ color: "#dc3545", fontSize: "0.8rem", marginTop: "0.5rem" }}>
+                    {errors.confirmPassword}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Confirm Password */}
-          <div className="col-md-6">
-            <label className="form-label">Confirm Password</label>
-            <div className="input-group">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                className={`form-control ${
-                  errors.confirmPassword ? "is-invalid" : ""
-                }`}
-                value={emp.confirmPassword}
-                onChange={(e) =>
-                  setEmp({ ...emp, confirmPassword: e.target.value })
-                }
-              />
-              <span
-                className="input-group-text"
-                style={{ cursor: "pointer" }}
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            {/* FORM ACTIONS */}
+            <div style={{
+              display: "flex",
+              gap: "1rem",
+              justifyContent: "flex-end",
+              marginTop: "2.5rem",
+              paddingTop: "2rem",
+              borderTop: "1px solid #e9ecef"
+            }}>
+              <button
+                type="button"
+                onClick={() => navigate("/admin/employees")}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  border: "1px solid #dee2e6",
+                  background: "#fff",
+                  color: "#666",
+                  borderRadius: "0.5rem",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  outline: "none"
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = "#f8f9fa";
+                  e.target.style.borderColor = "#bbb";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = "#fff";
+                  e.target.style.borderColor = "#dee2e6";
+                }}
               >
-                {showConfirmPassword ? "Hide" : "Show"}
-              </span>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  padding: "0.75rem 2rem",
+                  background: loading ? "#ccc" : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "0.5rem",
+                  fontSize: "0.9rem",
+                  fontWeight: "600",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  transition: "all 0.3s ease",
+                  outline: "none",
+                  boxShadow: "0 2px 8px rgba(102, 126, 234, 0.3)"
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.target.style.boxShadow = "0 4px 12px rgba(102, 126, 234, 0.4)";
+                    e.target.style.transform = "translateY(-2px)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
+                    e.target.style.boxShadow = "0 2px 8px rgba(102, 126, 234, 0.3)";
+                    e.target.style.transform = "translateY(0)";
+                  }
+                }}
+              >
+                {loading ? "Submitting..." : "Add Employee"}
+              </button>
             </div>
-            {errors.confirmPassword && (
-              <div className="invalid-feedback">{errors.confirmPassword}</div>
-            )}
-          </div>
+          </form>
         </div>
-
-        <div className="d-flex justify-content-end mt-4">
-          <button className="btn btn-primary btn-sm fw-bold" type="submit">
-            Submit
-          </button>
-        </div>
-      </form>
-
-      {/* Toast Container */}
-      <ToastContainer />
-    </>
+      </div>
+    </div>
   );
 }
