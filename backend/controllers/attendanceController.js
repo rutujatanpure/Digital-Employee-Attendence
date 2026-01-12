@@ -2,32 +2,33 @@ import Attendance from "../models/Attendance.js";
 import Employee from "../models/Employee.js";
 import SavedAttendance from "../models/SavedAttendance.js";
 
-
-
+/**
+ * EMPLOYEE – MARK ATTENDANCE (IN / OUT)
+ */
 export const markAttendance = async (req, res) => {
   try {
     const { employeeId } = req.body;
 
-    // 1️⃣ Check employee exists
+    // Check employee exists
     const emp = await Employee.findOne({ employeeId });
     if (!emp) {
       return res.status(404).json({ message: "❌ Invalid Employee ID" });
     }
 
-    // 2️⃣ Today date range (IMPORTANT: use Date, not string)
+    // Today range
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
-    // 3️⃣ Find today's attendance
+    // Find today's attendance
     let attendance = await Attendance.findOne({
       employeeId,
       date: { $gte: todayStart, $lte: todayEnd },
     });
 
-    // 4️⃣ FIRST SCAN → IN TIME
+    // FIRST SCAN → IN
     if (!attendance) {
       attendance = await Attendance.create({
         employeeId,
@@ -36,25 +37,25 @@ export const markAttendance = async (req, res) => {
       });
 
       return res.json({
-        message: "✅ Attendance IN marked successfully",
+        message: "✅ Attendance IN marked",
         type: "IN",
-        attendance, 
+        attendance,
       });
     }
 
-    // 5️⃣ SECOND SCAN → OUT TIME
+    // SECOND SCAN → OUT
     if (!attendance.outTime) {
       attendance.outTime = new Date();
       await attendance.save();
 
       return res.json({
-        message: "✅ Attendance OUT marked successfully",
+        message: "✅ Attendance OUT marked",
         type: "OUT",
-        attendance, 
+        attendance,
       });
     }
 
-    // 6️⃣ Already IN + OUT done
+    // Already done
     return res.status(400).json({
       message: "⚠️ Attendance already completed for today",
     });
@@ -76,7 +77,7 @@ export const getAttendance = async (req, res) => {
 };
 
 /**
- * EMPLOYEE – GET TODAY ATTENDANCE (for dashboard display)
+ * EMPLOYEE – GET TODAY ATTENDANCE
  */
 export const getTodayAttendance = async (req, res) => {
   try {
@@ -99,7 +100,10 @@ export const getTodayAttendance = async (req, res) => {
   }
 };
 
-// MONTHLY ATTENDANCE REPORT (ADMIN)
+/**
+ * ✅ ADMIN – MONTHLY ATTENDANCE GRID REPORT
+ * (Present / Absent auto calculated)
+ */
 export const getAttendanceReport = async (req, res) => {
   try {
     const { month, year } = req.query;
@@ -110,12 +114,50 @@ export const getAttendanceReport = async (req, res) => {
 
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0, 23, 59, 59);
+    const daysInMonth = new Date(year, month, 0).getDate();
 
-    const report = await Attendance.find({
+    // All employees
+    const employees = await Employee.find();
+
+    // Monthly attendance records
+    const attendances = await Attendance.find({
       date: { $gte: startDate, $lte: endDate },
-    }).sort({ date: 1 });
+    });
 
-    res.json(report);
+    const report = employees.map(emp => {
+      const attendanceMap = {};
+
+      // Default Absent ❌
+      for (let d = 1; d <= daysInMonth; d++) {
+        attendanceMap[d] = "A";
+      }
+
+      // Mark Present ✔
+      attendances
+        .filter(a => a.employeeId === emp.employeeId)
+        .forEach(a => {
+          const day = new Date(a.date).getDate();
+          if (a.inTime) {
+            attendanceMap[day] = "P";
+          }
+        });
+
+      return {
+        employeeId: emp.employeeId,
+        name: emp.name,
+        designation: emp.designation,
+        photo: emp.photo,
+        attendance: attendanceMap,
+      };
+    });
+
+    res.json({
+      month,
+      year,
+      daysInMonth,
+      totalEmployees: employees.length,
+      report,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -3,117 +3,263 @@ import Sidebar from "../../components/common/Sidebar";
 import API from "../../services/api";
 
 export default function AdminAttendanceReport() {
-  const [attendance, setAttendance] = useState([]);
+  const [reportData, setReportData] = useState([]);
+  const [daysInMonth, setDaysInMonth] = useState(0);
+  const [dayNames, setDayNames] = useState([]);
+  const [summary, setSummary] = useState({
+    totalEmployees: 0,
+    present: 0,
+    absent: 0,
+    leave: 0,
+  });
+
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
   const [error, setError] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [loading, setLoading] = useState(false);
 
-  const fetchReport = () => {
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  // -------------------- FETCH REPORT --------------------
+  const fetchReport = async () => {
     if (!month || !year) {
       setError("Please select month and year");
       return;
     }
-    setError("");
 
-    API.get(`/attendance/report?month=${month}&year=${year}`)
-      .then((res) => setAttendance(res.data))
-      .catch(() => setError("Failed to load attendance report"));
-  };
+    setLoading(true);
+    try {
+      const res = await API.get(
+        `/attendance/report?month=${month}&year=${year}`
+      );
 
-  // Generate years dynamically
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: currentYear - 2000 }, (_, i) => 2001 + i);
+      const report = res.data.report || [];
+      setReportData(report);
 
-  // Download CSV
-  const downloadCSV = () => {
-    if (!attendance.length) return;
+      const numDays = res.data.daysInMonth || 0;
+      setDaysInMonth(numDays);
+      setError("");
 
-    const headers = ["Employee ID", "Date", "In Time", "Out Time"];
-    const rows = attendance.map((a) => {
-      const dateStr = new Date(a.date).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
+      // Day names
+      const dayShorts = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const firstDay = new Date(year, month - 1, 1).getDay();
+      setDayNames(
+        Array.from({ length: numDays }, (_, i) => dayShorts[(firstDay + i) % 7])
+      );
+
+      // -------- TODAY BASED SUMMARY --------
+      const today = new Date();
+      const todayDay = today.getDate();
+      const todayMonth = today.getMonth() + 1;
+      const todayYear = today.getFullYear();
+
+      let present = 0;
+      let absent = 0;
+      let leave = 0;
+
+      if (Number(month) === todayMonth && Number(year) === todayYear) {
+        report.forEach((emp) => {
+          const status = emp.attendance?.[todayDay];
+
+          if (status === "P") present++;
+          else if (status === "L") leave++;
+          else absent++;
+        });
+      }
+
+      setSummary({
+        totalEmployees: report.length,
+        present,
+        absent,
+        leave,
       });
-      const inTimeStr = a.inTime ? new Date(a.inTime).toLocaleTimeString() : "-";
-      const outTimeStr = a.outTime ? new Date(a.outTime).toLocaleTimeString() : "-";
-      return [a.employeeId, dateStr, inTimeStr, outTimeStr];
-    });
-
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers, ...rows].map((e) => e.join(",")).join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute(
-      "href",
-      encodedUri
-    );
-    link.setAttribute(
-      "download",
-      `Attendance_Report_${month || "AllMonths"}_${year || "AllYears"}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load attendance report");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Sidebar collapse state
-  useEffect(() => {
-    const handleCollapsed = () => {
-      const isCollapsed = localStorage.getItem("sidebar-collapsed") === "true";
-      setCollapsed(isCollapsed);
-    };
-    window.addEventListener("storage", handleCollapsed);
-    return () => window.removeEventListener("storage", handleCollapsed);
-  }, []);
-
-  // Detect mobile screen
+  // -------------------- EFFECTS --------------------
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  return (
-    <div className="d-flex" style={{ height: "100vh", overflow: "hidden" }}>
-      {/* Sidebar */}
-      <Sidebar />
+  useEffect(() => {
+    const handleCollapsed = () =>
+      setCollapsed(localStorage.getItem("sidebar-collapsed") === "true");
+    window.addEventListener("storage", handleCollapsed);
+    return () => window.removeEventListener("storage", handleCollapsed);
+  }, []);
 
-      {/* Content */}
-      <div
-        className="flex-grow-1 overflow-auto p-3 p-md-4"
+  // -------------------- HELPERS --------------------
+  const renderStatus = (status, day) => {
+    const today = new Date();
+    const cellDate = new Date(year, month - 1, day);
+
+    if (cellDate > today) return <span style={{ color: "#adb5bd" }}>—</span>;
+    if (status === "P")
+      return (
+        <span
+          style={{
+            color: "#28a745",
+            fontWeight: "700",
+            fontSize: "16px",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "28px",
+            height: "28px",
+            backgroundColor: "#d4edda",
+            borderRadius: "4px",
+          }}
+        >
+          ✓
+        </span>
+      );
+    if (status === "L")
+      return (
+        <span
+          style={{
+            color: "#ffc107",
+            fontWeight: "700",
+            fontSize: "16px",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "28px",
+            height: "28px",
+            backgroundColor: "#fff3cd",
+            borderRadius: "4px",
+          }}
+        >
+          ●
+        </span>
+      );
+    return (
+      <span
         style={{
-          marginLeft: isMobile ? "0" : collapsed ? "60px" : "220px",
-          transition: "margin-left 0.3s ease",
-          height: "100vh",
+          color: "#dc3545",
+          fontWeight: "700",
+          fontSize: "16px",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "28px",
+          height: "28px",
+          backgroundColor: "#f8d7da",
+          borderRadius: "4px",
         }}
       >
-        {/* Filters */}
-        <div className="row g-2 mb-3 align-items-center">
-          <div className="col-12 col-md-3">
+        ✕
+      </span>
+    );
+  };
+
+  const getPresentDays = (attendance) =>
+    attendance
+      ? Object.entries(attendance).filter(
+          ([day, s]) => s === "P" && new Date(year, month - 1, day) <= new Date()
+        ).length
+      : 0;
+
+  const getPhotoUrl = (photo) => {
+    if (!photo) return null;
+    if (photo.startsWith("http")) return photo;
+    return `${API_URL.replace(/\/$/, "")}/${photo.replace(/^\//, "")}`;
+  };
+
+  const years = Array.from(
+    { length: new Date().getFullYear() - 2000 + 1 },
+    (_, i) => 2000 + i
+  );
+
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+
+  // -------------------- JSX --------------------
+  return (
+    <div className="d-flex" style={{ height: "100vh", backgroundColor: "#f5f7fa" }}>
+      <Sidebar />
+
+      <div
+        className="flex-grow-1 overflow-auto"
+        style={{
+          marginLeft: isMobile ? 0 : collapsed ? 60 : 220,
+          padding: isMobile ? "16px" : "24px 32px",
+        }}
+      >
+        {/* HEADER */}
+        <div style={{ marginBottom: "32px" }}>
+          <h2 style={{ fontSize: "28px", fontWeight: "700", color: "#1a1d29", marginBottom: "4px" }}>
+            Attendance Report
+          </h2>
+          <p style={{ fontSize: "14px", color: "#6c757d", margin: 0 }}>
+            Monitor and manage employee attendance across all departments
+          </p>
+        </div>
+
+        {/* FILTER SECTION */}
+        <div
+          style={{
+            backgroundColor: "white",
+            padding: "20px 24px",
+            borderRadius: "12px",
+            marginBottom: "24px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr auto",
+            gap: "16px",
+            alignItems: "flex-end",
+          }}
+        >
+          <div>
+            <label style={{ fontSize: "12px", fontWeight: "600", color: "#495057", display: "block", marginBottom: "8px" }}>
+              Month
+            </label>
             <select
-              className="form-select"
+              className="form-select form-select-sm"
               value={month}
               onChange={(e) => setMonth(e.target.value)}
+              style={{
+                padding: "10px 12px",
+                border: "1px solid #e0e3e8",
+                borderRadius: "6px",
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
             >
               <option value="">Select Month</option>
-              {[...Array(12)].map((_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  {i + 1}
+              {monthNames.map((m, i) => (
+                <option key={i} value={i + 1}>
+                  {m}
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="col-12 col-md-3">
+          <div>
+            <label style={{ fontSize: "12px", fontWeight: "600", color: "#495057", display: "block", marginBottom: "8px" }}>
+              Year
+            </label>
             <select
-              className="form-select"
+              className="form-select form-select-sm"
               value={year}
               onChange={(e) => setYear(e.target.value)}
+              style={{
+                padding: "10px 12px",
+                border: "1px solid #e0e3e8",
+                borderRadius: "6px",
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
             >
               <option value="">Select Year</option>
               {years.map((y) => (
@@ -124,77 +270,321 @@ export default function AdminAttendanceReport() {
             </select>
           </div>
 
-          <div className="col-12 col-md-3">
+          <div style={{ visibility: isMobile ? "visible" : "visible" }}>
             <button
-              className="btn btn-primary w-100"
-              style={{ height: "38px", fontSize: "0.875rem" }}
+              className="btn w-100"
               onClick={fetchReport}
+              disabled={loading}
+              style={{
+                padding: "10px 24px",
+                backgroundColor: loading ? "#ccc" : "#0d6efd",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                fontWeight: "600",
+                fontSize: "14px",
+                cursor: loading ? "not-allowed" : "pointer",
+                transition: "all 0.3s",
+              }}
             >
-              Generate
+              {loading ? "Loading..." : "Generate Report"}
             </button>
           </div>
         </div>
 
-        {error && <p className="text-danger">{error}</p>}
-
-        {/* Table */}
-        <div className="table-responsive flex-grow-1 mb-2">
-          <table className="table table-bordered table-hover table-sm mb-0 text-center">
-            <thead className="table-light sticky-top">
-              <tr>
-                <th>Employee ID</th>
-                <th>Date</th>
-                <th>In Time</th>
-                <th>Out Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {attendance.length === 0 ? (
-                <tr>
-                  <td colSpan="4" className="text-center">
-                    No records found
-                  </td>
-                </tr>
-              ) : (
-                attendance.map((a, i) => (
-                  <tr key={i}>
-                    <td>{a.employeeId}</td>
-                    <td>
-                      {new Date(a.date).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </td>
-                    <td>
-                      {a.inTime
-                        ? new Date(a.inTime).toLocaleTimeString()
-                        : "-"}
-                    </td>
-                    <td>
-                      {a.outTime
-                        ? new Date(a.outTime).toLocaleTimeString()
-                        : "-"}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        {/* SUMMARY CARDS */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)",
+            gap: "16px",
+            marginBottom: "24px",
+          }}
+        >
+          {[
+            { label: "Total Employees", value: summary.totalEmployees, icon: "👥", color: "#0d6efd" },
+            { label: "Present", value: summary.present, icon: "✓", color: "#28a745" },
+            { label: "Absent", value: summary.absent, icon: "✕", color: "#dc3545" },
+            { label: "Leave", value: summary.leave, icon: "●", color: "#ffc107" },
+          ].map((stat, i) => (
+            <div
+              key={i}
+              style={{
+                backgroundColor: "white",
+                padding: "20px",
+                borderRadius: "12px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                borderLeft: `4px solid ${stat.color}`,
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <p style={{ fontSize: "12px", color: "#6c757d", fontWeight: "500", margin: 0, marginBottom: "8px" }}>
+                    {stat.label}
+                  </p>
+                  <h3 style={{ fontSize: "28px", fontWeight: "700", color: stat.color, margin: 0 }}>
+                    {stat.value}
+                  </h3>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Download Button */}
-        {attendance.length > 0 && (
-          <div className="d-flex justify-content-end mt-2">
-            <button
-              className="btn btn-success"
-              style={{ height: "38px", fontSize: "0.875rem" }}
-              onClick={downloadCSV}
-            >
-              Download Report
-            </button>
+        {/* ERROR MESSAGE */}
+        {error && (
+          <div
+            style={{
+              backgroundColor: "#f8d7da",
+              color: "#721c24",
+              padding: "12px 16px",
+              borderRadius: "8px",
+              marginBottom: "20px",
+              fontSize: "14px",
+              fontWeight: "500",
+            }}
+          >
+            ⚠️ {error}
           </div>
         )}
+         {/* ATTENDANCE LEGEND */}
+<div
+  style={{
+    display: "flex",
+    gap: "20px",
+    alignItems: "center",
+    marginBottom: "12px",
+    padding: "12px 16px",
+    backgroundColor: "#ffffff",
+    borderRadius: "8px",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#495057",
+    flexWrap: "wrap",
+  }}
+>
+  <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+    <span
+      style={{
+        width: "16px",
+        height: "16px",
+        backgroundColor: "#d4edda",
+        borderRadius: "4px",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#28a745",
+        fontWeight: "700",
+      }}
+    >
+      ✓
+    </span>
+    Present
+  </span>
+
+  <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+    <span
+      style={{
+        width: "16px",
+        height: "16px",
+        backgroundColor: "#f8d7da",
+        borderRadius: "4px",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#dc3545",
+        fontWeight: "700",
+      }}
+    >
+      ✕
+    </span>
+    Absent
+  </span>
+
+  <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+    <span
+      style={{
+        width: "16px",
+        height: "16px",
+        backgroundColor: "#fff3cd",
+        borderRadius: "4px",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#ffc107",
+        fontWeight: "700",
+      }}
+    >
+      ●
+    </span>
+    Leave
+  </span>
+</div>
+
+        {/* TABLE */}
+        <div
+          style={{
+            backgroundColor: "white",
+            borderRadius: "12px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 400px)" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+              <thead>
+                <tr style={{ backgroundColor: "#f8f9fa", borderBottom: "2px solid #e9ecef" }}>
+                  <th
+                    style={{
+                      textAlign: "left",
+                      padding: "16px 12px",
+                      fontWeight: "700",
+                      color: "#495057",
+                      minWidth: "280px",
+                      position: "sticky",
+                      left: 0,
+                      backgroundColor: "#f8f9fa",
+                    }}
+                  >
+                    Employee
+                  </th>
+                  {Array.from({ length: daysInMonth }, (_, i) => (
+                    <th
+                      key={i}
+                      style={{
+                        padding: "12px 6px",
+                        fontWeight: "700",
+                        color: "#495057",
+                        minWidth: "45px",
+                        textAlign: "center",
+                      }}
+                    >
+                      <div style={{ fontSize: "13px" }}>{i + 1}</div>
+                      <div style={{ fontSize: "10px", color: "#adb5bd", fontWeight: "500", marginTop: "2px" }}>
+                        {dayNames[i]}
+                      </div>
+                    </th>
+                  ))}
+                  <th
+                    style={{
+                      padding: "16px 12px",
+                      fontWeight: "700",
+                      color: "#495057",
+                      minWidth: "80px",
+                      textAlign: "center",
+                    }}
+                  >
+                    Total
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {reportData.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={daysInMonth + 2}
+                      style={{
+                        padding: "48px 16px",
+                        textAlign: "center",
+                        color: "#adb5bd",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {loading ? "Loading attendance data..." : "Select month and year to view attendance report"}
+                    </td>
+                  </tr>
+                ) : (
+                  reportData.map((emp, i) => {
+                    const photoUrl = getPhotoUrl(emp.photo);
+                    return (
+                      <tr
+                        key={i}
+                        style={{
+                          borderBottom: "1px solid #e9ecef",
+                          transition: "background-color 0.2s",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8f9fa")}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                      >
+                        <td
+                          style={{
+                            padding: "14px 12px",
+                            textAlign: "left",
+                            position: "sticky",
+                            left: 0,
+                            backgroundColor: "white",
+                            fontWeight: "500",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                            {photoUrl ? (
+                              <img
+                                src={photoUrl}
+                                alt={emp.name}
+                                width={36}
+                                height={36}
+                                style={{
+                                  borderRadius: "50%",
+                                  objectFit: "cover",
+                                  border: "2px solid #e9ecef",
+                                }}
+                              />
+                            ) : (
+                              <div
+                                style={{
+                                  width: 36,
+                                  height: 36,
+                                  borderRadius: "50%",
+                                  backgroundColor: "#0d6efd",
+                                  color: "white",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontWeight: "700",
+                                  fontSize: "14px",
+                                }}
+                              >
+                                {emp.name?.[0]?.toUpperCase()}
+                              </div>
+                            )}
+                            <div>
+                              <div style={{ fontWeight: "700", color: "#1a1d29", fontSize: "14px" }}>
+                                {emp.name}
+                              </div>
+                              <div style={{ fontSize: "12px", color: "#adb5bd", marginTop: "2px" }}>
+                                {emp.employeeId}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {Array.from({ length: daysInMonth }, (_, d) => (
+                          <td key={d} style={{ padding: "12px 6px", textAlign: "center" }}>
+                            {renderStatus(emp.attendance?.[d + 1], d + 1)}
+                          </td>
+                        ))}
+
+                        <td
+                          style={{
+                            padding: "14px 12px",
+                            fontWeight: "700",
+                            color: "#28a745",
+                            textAlign: "center",
+                            fontSize: "14px",
+                          }}
+                        >
+                          {getPresentDays(emp.attendance)}/{daysInMonth}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

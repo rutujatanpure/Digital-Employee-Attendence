@@ -5,15 +5,15 @@ import {
   getTodayAttendance,
   getAttendanceReport
 } from "../controllers/attendanceController.js";
-import SavedAttendance from "../models/SavedAttendance.js";
-
 
 const router = express.Router();
 
-router.post("/", markAttendance);                 // IN / OUT
-router.get("/", getAttendance);                   // Admin
-router.get("/today/:employeeId", getTodayAttendance); // Employee dashboard
-router.get("/report", getAttendanceReport);
+// Employee
+router.post("/", markAttendance);
+router.get("/today/:employeeId", getTodayAttendance);
 
+// Admin
+router.get("/", getAttendance);
+router.get("/report", getAttendanceReport);
 
 export default router;

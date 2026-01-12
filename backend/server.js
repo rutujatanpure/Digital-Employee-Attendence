@@ -18,12 +18,12 @@ app.use(
 
 app.use(express.json());
 
-// ✅ STATIC FILES
+// STATIC FILES
 app.use(
   "/uploads",
   express.static(path.join(process.cwd(), "uploads"), {
     setHeaders: (res) => {
-      // ✅ Allow cross-origin for images
+      // Allow cross-origin for images
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
     },
@@ -42,7 +42,7 @@ app.use("/api/public/employees", employeePublicRoutes);
 app.use("/api/attendance", attendanceRoutes);
 
 app.get("/", (req, res) => {
-  res.send("✅ Digital Employee ID Backend Running");
+  res.send("Digital Employee ID Backend Running");
 });
 
 const PORT = process.env.PORT || 5000;

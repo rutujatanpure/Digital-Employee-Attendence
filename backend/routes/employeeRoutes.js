@@ -19,10 +19,10 @@ router.post("/login", employeeLogin);
 
 // ================= ADMIN ROUTES =================
 
-// ➕ ADD EMPLOYEE (ADMIN ONLY)
+// ADD EMPLOYEE (ADMIN ONLY)
 router.post(
   "/",
-  authMiddleware,               // ADMIN
+  authMiddleware,              
   upload.single("photo"),
   addEmployee
 );
