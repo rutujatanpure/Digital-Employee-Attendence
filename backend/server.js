@@ -4,33 +4,44 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import path from "path";
 
-dotenv.config();
+// ----------------------
+// Load single root .env
+// ----------------------
+// This ensures .env from root folder is used, whether cwd is backend or root
+dotenv.config({ path: path.resolve(path.join(process.cwd(), ".."), ".env") });
+
 connectDB();
 
 const app = express();
 
+// ----------------------
+// CORS
+// ----------------------
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: true, // allows any origin (works for dev + prod)
     credentials: true,
   })
 );
 
 app.use(express.json());
 
-// STATIC FILES
+// ----------------------
+// STATIC FILES (uploads)
+// ----------------------
 app.use(
   "/uploads",
   express.static(path.join(process.cwd(), "uploads"), {
     setHeaders: (res) => {
-      // Allow cross-origin for images
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
     },
   })
 );
 
-// Routes
+// ----------------------
+// API Routes
+// ----------------------
 import adminRoutes from "./routes/adminRoutes.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import employeePublicRoutes from "./routes/employeePublicRoutes.js";
@@ -41,11 +52,20 @@ app.use("/api/employees", employeeRoutes);
 app.use("/api/public/employees", employeePublicRoutes);
 app.use("/api/attendance", attendanceRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Digital Employee ID Backend Running");
+// ----------------------
+// FRONTEND PRODUCTION BUILD SERVE
+// ----------------------
+const frontendBuildPath = path.join(process.cwd(), "../frontend/build");
+app.use(express.static(frontendBuildPath));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontendBuildPath, "index.html"));
 });
 
+// ----------------------
+// START SERVER
+// ----------------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });

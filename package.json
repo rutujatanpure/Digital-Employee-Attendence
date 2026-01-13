@@ -5,11 +5,8 @@
   "scripts": {
     "backend": "npm start --prefix backend",
     "frontend": "npm start --prefix frontend",
-
     "dev": "npm-run-all --parallel backend frontend",
-
     "build": "npm run build --prefix frontend",
-
-    "start": "npm run build && node backend/server.js"
+    "start": "npm run build && node backend/server.js" 
   }
 }
