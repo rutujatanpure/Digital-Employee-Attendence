@@ -2,8 +2,8 @@ import Attendance from "../models/Attendance.js";
 import Employee from "../models/Employee.js";
 import SavedAttendance from "../models/SavedAttendance.js";
 
-/**
- * EMPLOYEE – MARK ATTENDANCE (IN / OUT)
+/*
+  EMPLOYEE – MARK ATTENDANCE (IN / OUT)
  */
 export const markAttendance = async (req, res) => {
   try {
@@ -101,7 +101,7 @@ export const getTodayAttendance = async (req, res) => {
 };
 
 /**
- * ✅ ADMIN – MONTHLY ATTENDANCE GRID REPORT
+ *  ADMIN – MONTHLY ATTENDANCE GRID REPORT
  * (Present / Absent auto calculated)
  */
 export const getAttendanceReport = async (req, res) => {
