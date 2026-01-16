@@ -13,6 +13,8 @@ export default function EmployeeIDCard() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
+  const [activeTheme, setActiveTheme] = useState("theme_1"); 
+
 
   useEffect(() => {
     setLoading(true);
@@ -31,6 +33,18 @@ export default function EmployeeIDCard() {
       .then((res) => setAttendance(res.data))
       .catch(() => setAttendance(null));
   }, [id]);
+  useEffect(() => {
+  API.get("/idcard-theme/active")
+    .then((res) => {
+      if (res.data?.themeKey) {
+        setActiveTheme(res.data.themeKey);
+      }
+    })
+    .catch(() => {
+      setActiveTheme("theme_1");
+    });
+}, []);
+
 
   const handleAttendanceScan = async () => {
     if (!emp) return;
@@ -108,15 +122,13 @@ export default function EmployeeIDCard() {
       <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)", padding: "2rem 1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ maxWidth: "500px", width: "100%" }}>
           {/* ID CARD SECTION */}
-          <div style={{ marginBottom: "2rem" }}>
-            <div style={{
-              display: "flex",
-              justifyContent: "center",
-              animation: "slideUp 0.6s ease-out"
-            }}>
-              <EmployeeIdOnlyCard emp={emp} />
-            </div>
-          </div>
+          
+<div style={{ marginBottom: "2rem" }}>
+  <div style={{ display: "flex", justifyContent: "center" }}>
+    <EmployeeIdOnlyCard emp={emp} themeKey={activeTheme} />  
+  </div>
+</div>
+
 
           {/* ATTENDANCE SECTION */}
           <div style={{

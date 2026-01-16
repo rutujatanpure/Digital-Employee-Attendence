@@ -11,7 +11,7 @@ export default function BarcodeScanner({ onDetected }) {
         height={200}
         onUpdate={(err, result) => {
           if (result) {
-            onDetected(result.text); // employeeId
+            onDetected(result.text); 
           }
           if (err) setError("Camera access error");
         }}

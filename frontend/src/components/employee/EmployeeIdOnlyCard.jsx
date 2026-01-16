@@ -1,192 +1,224 @@
-import { useState } from 'react';
-
+import { useState, useEffect } from "react";
 import companyLogo from "../../assets/images/logo.png";
+import API from "../../services/api";
+import { idCardThemes } from "../systemAdmin/idCardThemes";
 
-export default function EmployeeIdOnlyCard({ emp = { name: "John Doe", role: "Senior Developer", photo: null, barcode: null } }) {
+export default function EmployeeIdOnlyCard({ emp }) {
   const [imageError, setImageError] = useState(false);
+  const [activeTheme, setActiveTheme] = useState("theme_1");
+
+  // Fetch active theme from backend on load
+  useEffect(() => {
+    API.get("/idcard-theme/active")
+      .then((res) => {
+        if (res.data?.themeKey) {
+          setActiveTheme(res.data.themeKey);
+        }
+      })
+      .catch(() => {
+        setActiveTheme("theme_1");
+      });
+  }, []);
 
   if (!emp) return null;
 
+  // Pick theme
+  const theme = idCardThemes[activeTheme] || idCardThemes.theme_1;
+
   return (
     <div
-      className="shadow-lg hover:shadow-xl transition-shadow duration-300"
       style={{
         width: "280px",
-        minHeight: "440px",
-        borderRadius: "12px",
-        border: "1px solid #e5e7eb",
-        backgroundColor: "#ffffff",
+        height: "440px",
+        borderRadius: "8px",
         overflow: "hidden",
+        background: theme.background,
+        border: "3px solid #222",
+        boxShadow: "0 15px 40px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+        position: "relative",
         display: "flex",
         flexDirection: "column",
-        position: "relative",
-        boxShadow: "0 10px 25px rgba(0, 0, 0, 0.08)",
       }}
     >
-      {/* Accent borders */}
+      {/* HEADER */}
       <div
         style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: "4px",
-          background: "linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%)",
-        }}
-      />
-
-      {/* Top section with company branding */}
-      <div
-        style={{
-          height: "70px",
-          background: "linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)",
+          height: "75px",
+          background: theme.header,
           display: "flex",
           alignItems: "center",
-          padding: "0 16px",
-          gap: "12px",
+          justifyContent: "flex-start",
+          padding: "12px 14px",
+          gap: "10px",
+          boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1)",
         }}
       >
         <img
           src={companyLogo}
-          alt="Company Logo"
+          alt="Company logo"
           style={{
-            height: "44px",
-            width: "44px",
+            height: "45px",
+            width: "45px",
+            borderRadius: "6px",
             objectFit: "contain",
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
-            borderRadius: "8px",
-            padding: "4px",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
+            background: "rgba(255, 255, 255, 0.15)",
+            padding: "5px",
+            border: "1.5px solid rgba(255, 255, 255, 0.3)",
           }}
         />
 
-        <div style={{ flex: 1 }}>
-          <span
-            style={{
-              color: "#ffffff",
-              fontSize: "16px",
-              fontWeight: "600",
-              letterSpacing: "0.3px",
-              display: "block",
-              lineHeight: "1.2",
-            }}
-          >
+        <div style={{ color: "#fff", textAlign: "left", flex: 1 }}>
+          <div style={{ fontSize: "16px", fontWeight: "800", letterSpacing: "-0.2px", lineHeight: "1.1" }}>
             Nova Tech
-          </span>
-          <span
-            style={{
-              color: "rgba(255, 255, 255, 0.8)",
-              fontSize: "12px",
-              fontWeight: "400",
-              letterSpacing: "0.2px",
-            }}
-          >
+          </div>
+          <div style={{ fontSize: "10px", opacity: 0.8, fontWeight: "600", letterSpacing: "0.6px" }}>
             SOLUTIONS
-          </span>
+          </div>
         </div>
       </div>
 
-      {/* Content section */}
+      {/* MIDDLE SECTION */}
       <div
         style={{
-          padding: "24px 18px",
-          textAlign: "center",
           flex: 1,
-          backgroundColor: "#f8fafc",
+          padding: "18px 14px",
+          textAlign: "center",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
           alignItems: "center",
+          justifyContent: "center",
+          gap: "14px",
         }}
       >
-        {/* Employee photo */}
-        {emp.photo && !imageError && (
-          <div
-            style={{
-              marginBottom: "16px",
-              position: "relative",
-            }}
-          >
+        {/* EMPLOYEE PHOTO */}
+        <div
+          style={{
+            position: "relative",
+            borderRadius: "8px",
+            overflow: "hidden",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+          }}
+        >
+          {emp.photo && !imageError ? (
             <img
               src={`http://localhost:5000/${emp.photo}`}
-              crossOrigin="anonymous"
-              alt={emp.name}
+              alt={`${emp.name} profile`}
               onError={() => setImageError(true)}
               style={{
-                width: "140px",
+                width: "130px",
                 height: "140px",
                 objectFit: "cover",
-                borderRadius: "10px",
-                border: "3px solid #ffffff",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-              }}
-            />
-          </div>
-        )}
-
-        {/* Employee name */}
-        <h3
-          style={{
-            margin: "8px 0 6px",
-            fontSize: "18px",
-            fontWeight: "700",
-            color: "#0f172a",
-            letterSpacing: "0.2px",
-          }}
-        >
-          {emp.name}
-        </h3>
-
-        {/* Employee role */}
-        <p
-          style={{
-            margin: "0 0 20px",
-            fontSize: "13px",
-            color: "#64748b",
-            fontWeight: "500",
-            textTransform: "uppercase",
-            letterSpacing: "0.8px",
-            lineHeight: "1.4",
-          }}
-        >
-          {emp.role}
-        </p>
-
-        {/* Barcode */}
-        {emp.barcode && (
-          <div
-            style={{
-              marginTop: "auto",
-              width: "100%",
-              paddingTop: "12px",
-              borderTop: "1px solid #e2e8f0",
-            }}
-          >
-            <img
-              src={`http://localhost:5000/${emp.barcode}`}
-              crossOrigin="anonymous"
-              alt="Employee Barcode"
-              style={{
-                width: "120px",
-                height: "40px",
-                objectFit: "contain",
-                margin: "0 auto",
+                borderRadius: "8px",
+                border: `3px solid #fff`,
                 display: "block",
               }}
             />
-            <span
+          ) : (
+            <div
               style={{
-                fontSize: "10px",
-                color: "#94a3b8",
-                marginTop: "6px",
-                display: "block",
-                letterSpacing: "0.5px",
+                width: "130px",
+                height: "140px",
+                borderRadius: "8px",
+                background: "#d8d8d8",
+                border: "3px solid #fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "48px",
+                color: "#888",
               }}
             >
-              ID SCAN
-            </span>
+              👤
+            </div>
+          )}
+        </div>
+
+        {/* EMPLOYEE NAME & ROLE */}
+        <div style={{ width: "100%", lineHeight: "1.2" }}>
+          <h3
+            style={{
+              margin: "0 0 4px 0",
+              fontSize: "18px",
+              fontWeight: "800",
+              color: "#1a1a1a",
+              letterSpacing: "-0.3px",
+            }}
+          >
+            {emp.name}
+          </h3>
+
+          <p
+            style={{
+              fontSize: "11px",
+              textTransform: "uppercase",
+              color: theme.accent,
+              fontWeight: "800",
+              margin: 0,
+              letterSpacing: "0.5px",
+            }}
+          >
+            {emp.role}
+          </p>
+        </div>
+      </div>
+
+      {/* BARCODE SECTION */}
+      <div
+        style={{
+          padding: "12px 14px",
+          textAlign: "center",
+          borderTop: "1px solid #ddd",
+          background: "#fafafa",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {emp.barcode ? (
+          <img
+            src={`http://localhost:5000/${emp.barcode}`}
+            alt="Employee barcode"
+            style={{
+              width: "115px",
+              height: "40px",
+              objectFit: "contain",
+              margin: "0 auto",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: "115px",
+              height: "40px",
+              background: "#d0d0d0",
+              margin: "0 auto",
+              borderRadius: "1px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "10px",
+              color: "#888",
+              fontWeight: "700",
+              fontFamily: "monospace",
+              letterSpacing: "1.5px",
+            }}
+          >
+            ||||||||
           </div>
         )}
+
+        <p
+          style={{
+            fontSize: "8px",
+            color: "#888",
+            margin: "4px 0 0 0",
+            fontWeight: "600",
+            letterSpacing: "0.3px",
+          }}
+        >
+          
+        </p>
       </div>
     </div>
   );

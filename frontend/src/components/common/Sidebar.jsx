@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+
 import {
   FaUserPlus,
   FaUsers,
@@ -9,6 +10,7 @@ import {
   FaBars,
   FaLayerGroup,
   FaTimes,
+  FaIdCard,
 } from "react-icons/fa";
 import "./Sidebar.css";
 
@@ -38,11 +40,17 @@ function Sidebar() {
     { label: "Employee List", icon: <FaUsers />, path: "/admin/employees" },
     { label: "Create Employee ID", icon: <FaUserPlus />, path: "/admin/add" },
     { label: "Attendance", icon: <FaCheckSquare />, path: "/admin/attendance" },
+    
     {
       label: "Attendance Report",
       icon: <FaFileAlt />,
       path: "/admin/attendance-report",
     },
+    {
+      label: "ID Card Theme",
+      icon: <FaIdCard />,  
+      path: "/admin/id-card-theme",
+    }
   ];
 
   return (
@@ -57,7 +65,7 @@ function Sidebar() {
             top: "1rem",
             left: "1rem",
             zIndex: 1040,
-            background: "#667eea",
+            background: "#000",
             color: "#fff",
             border: "none",
             borderRadius: "0.5rem",
@@ -68,11 +76,11 @@ function Sidebar() {
             transition: "all 0.3s ease"
           }}
           onMouseEnter={(e) => {
-            e.target.style.background = "#5568d3";
-            e.target.style.boxShadow = "0 4px 12px rgba(102, 126, 234, 0.3)";
+            e.target.style.background = "#1a1a1a";
+            e.target.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.3)";
           }}
           onMouseLeave={(e) => {
-            e.target.style.background = "#667eea";
+            e.target.style.background = "#000";
             e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.15)";
           }}
         >
@@ -88,7 +96,7 @@ function Sidebar() {
           top: 0,
           height: "100vh",
           width: isMobile ? "250px" : "220px",
-          background: "#2c3e50",
+          background: "#000",
           boxShadow: "2px 0 8px rgba(0, 0, 0, 0.15)",
           display: "flex",
           flexDirection: "column",
@@ -195,7 +203,7 @@ function Sidebar() {
                   })}
                   onMouseEnter={(e) => {
                     if (!e.target.closest("a").className.includes("active")) {
-                      e.currentTarget.style.background = "rgba(102, 126, 234, 0.05)";
+                      e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
                       e.currentTarget.style.color = "#fff";
                     }
                   }}
@@ -304,7 +312,7 @@ function Sidebar() {
         }
 
         [style*="overflowY: auto"]::-webkit-scrollbar-thumb:hover {
-          background: rgba(102, 126, 234, 0.5);
+          background: rgba(255, 255, 255, 0.5);
         }
       `}</style>
     </>

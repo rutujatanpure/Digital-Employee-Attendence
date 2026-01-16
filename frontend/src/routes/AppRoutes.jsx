@@ -9,6 +9,9 @@ import ViewEmployees from "../pages/admin/ViewEmployees";
 import EditEmployee from "../pages/admin/EditEmployee";
 import AdminAttendance from "../pages/admin/AdminAttendance";
 import AdminAttendanceReport from "../pages/admin/AdminAttendanceReport";
+import IdCardThemePage from "../components/systemAdmin/IdCardThemePage";
+
+
 
 // EMPLOYEE
 import EmployeeDashboard from "../pages/employee/EmployeeDashboard";
@@ -22,7 +25,7 @@ export default function AppRoutes() {
 
         <Route path="/admin/login" element={<AdminLogin />} />
 
-        {/* ✅ Redirect /admin to employee list */}
+        {/*  Redirect /admin to employee list */}
         <Route path="/admin" element={<Navigate to="/admin/employees" replace />} />
 
         <Route path="/admin/add" element={<AddEmployee />} />
@@ -33,7 +36,10 @@ export default function AppRoutes() {
           path="/admin/attendance-report"
           element={<AdminAttendanceReport />}
         />
-
+        <Route
+          path="/admin/id-card-theme"
+          element={<IdCardThemePage />}
+        />
         <Route path="/employee" element={<EmployeeDashboard />} />
         <Route path="/employee/:id" element={<EmployeeIDCard />} />
       </Routes>

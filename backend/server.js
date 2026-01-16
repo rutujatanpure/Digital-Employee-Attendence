@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import path from "path";
+import idCardThemeRoutes from "./routes/idCardThemeRoutes.js";
 
 // ----------------------
 // Load single root .env
@@ -51,7 +52,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/public/employees", employeePublicRoutes);
 app.use("/api/attendance", attendanceRoutes);
-
+app.use("/api/idcard-theme", idCardThemeRoutes);
 // ----------------------
 // FRONTEND PRODUCTION BUILD SERVE
 // ----------------------

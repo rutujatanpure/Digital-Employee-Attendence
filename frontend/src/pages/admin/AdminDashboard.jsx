@@ -14,7 +14,9 @@ export default function AdminDashboard() {
     { label: "Create Employee ID", path: "/admin/add", icon: "bi-person-plus" },
     { label: "Employee List", path: "/admin/employees", icon: "bi-people" },
     { label: "Attendance", path: "/admin/attendance", icon: "bi-check2-square" },
-    { label: "Attendance Report", path: "/admin/attendance-report", icon: "bi-file-earmark-text" }
+    { label: "Attendance Report", path: "/admin/attendance-report", icon: "bi-file-earmark-text" },
+    { label: "ID Card Theme", path: "/admin/id-card-theme", icon: "bi-layers" } 
+    
   ]}
 />
 
