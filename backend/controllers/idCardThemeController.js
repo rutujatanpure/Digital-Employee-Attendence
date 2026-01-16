@@ -20,10 +20,10 @@ export const applyTheme = async (req, res) => {
     return res.status(400).json({ message: "themeKey is required" });
   }
 
-  // 1️⃣ Sab themes inactive
+  // 1️⃣ all themes inactive
   await IdCardTheme.updateMany({}, { isActive: false });
 
-  // 2️⃣ Theme apply (agar DB me nahi hai to create bhi ho jayegi)
+  // 2️⃣ Theme apply (if theme is not present in DB then it creates )
   const theme = await IdCardTheme.findOneAndUpdate(
     { themeKey },
     { isActive: true },
